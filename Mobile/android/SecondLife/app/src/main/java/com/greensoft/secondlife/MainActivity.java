@@ -16,11 +16,14 @@ import org.webrtc.VideoRendererGui;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements WebRtcClient.RtcListener{
+public class MainActivity extends AppCompatActivity {//implements WebRtcClient.RtcListener{
 
-    private final static int VIDEO_CALL_SENT = 666;
+
     public static final String VIDEO_CODEC_VP9 = "VP9";
     public static final String AUDIO_CODEC_OPUS = "opus";
+
+    /*
+    private final static int VIDEO_CALL_SENT = 666;
     // Local preview screen position before call is connected.
     private static final int LOCAL_X_CONNECTING = 0;
     private static final int LOCAL_Y_CONNECTING = 0;
@@ -140,12 +143,6 @@ public class MainActivity extends AppCompatActivity implements WebRtcClient.RtcL
 
     public void call(String callId) {
         startCam();
-        /*
-        Intent msg = new Intent(Intent.ACTION_SEND);
-        msg.putExtra(Intent.EXTRA_TEXT, mSocketAddress + callId);
-        msg.setType("text/plain");
-        startActivityForResult(Intent.createChooser(msg, "Call someone :"), VIDEO_CALL_SENT);
-        */
     }
 
     @Override
@@ -198,5 +195,5 @@ public class MainActivity extends AppCompatActivity implements WebRtcClient.RtcL
                 LOCAL_WIDTH_CONNECTING, LOCAL_HEIGHT_CONNECTING,
                 scalingType);
     }
-
+    */
 }

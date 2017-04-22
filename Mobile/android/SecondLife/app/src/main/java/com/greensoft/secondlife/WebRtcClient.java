@@ -10,6 +10,7 @@ import com.github.nkzawa.emitter.Emitter;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
 import android.hardware.Camera;
 import android.opengl.EGLContext;
 import android.util.Log;
@@ -206,6 +207,13 @@ public class WebRtcClient {
         }
 
         @Override
+        public void onIceConnectionReceivingChange(boolean b) {
+
+            int foo = 1;
+            int bar = foo;
+        }
+
+        @Override
         public void onIceGatheringChange(PeerConnection.IceGatheringState iceGatheringState) {}
 
         @Override
@@ -265,16 +273,16 @@ public class WebRtcClient {
     private void removePeer(String id) {
         Peer peer = peers.get(id);
         mListener.onRemoveRemoteStream(peer.endPoint);
-        //peer.pc.close();
+        peer.pc.close();
         peers.remove(peer.id);
         endPoints[peer.endPoint] = false;
     }
 
-    public WebRtcClient(RtcListener listener, String host, PeerConnectionParameters params, EGLContext mEGLcontext) {
+    public WebRtcClient(Context context, RtcListener listener, String host, PeerConnectionParameters params, EGLContext mEGLcontext) {
         mListener = listener;
         pcParams = params;
-        PeerConnectionFactory.initializeAndroidGlobals(listener, true, true,
-                params.videoCodecHwAcceleration, mEGLcontext);
+        PeerConnectionFactory.initializeAndroidGlobals(context,/*listener, */true, true,
+                params.videoCodecHwAcceleration/*, mEGLcontext*/);
         factory = new PeerConnectionFactory();
         MessageHandler messageHandler = new MessageHandler();
 
@@ -366,7 +374,7 @@ public class WebRtcClient {
     }
 
     private VideoCapturer getVideoCapturer() {
-        String frontCameraDeviceName = VideoCapturerAndroid.getNameOfFrontFacingDevice();
+        String frontCameraDeviceName = getNameOfFrontFacingDevice();//VideoCapturerAndroid.getNameOfFrontFacingDevice();
         return VideoCapturerAndroid.create(frontCameraDeviceName);
     }
 
