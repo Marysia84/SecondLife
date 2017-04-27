@@ -1,0 +1,12 @@
+.log_area{
+width:750px;
+height:300px;
+overflow:scroll;
+resize:both;
+font-family:Tahoma;
+font-size: 11px;
+}
+
+p.error {color:rgb(255,0,0);}
+p.warning {color:rgb(255,0,0);}
+p.info {color:rgb(128,128,128);}

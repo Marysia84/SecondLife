@@ -10,19 +10,20 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import org.json.JSONException;
+import org.webrtc.EglBase;
 import org.webrtc.MediaStream;
+import org.webrtc.RendererCommon;
 import org.webrtc.VideoRenderer;
 import org.webrtc.VideoRendererGui;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {//implements WebRtcClient.RtcListener{
+public class MainActivity extends AppCompatActivity implements WebRtcClient.RtcListener{
 
 
     public static final String VIDEO_CODEC_VP9 = "VP9";
     public static final String AUDIO_CODEC_OPUS = "opus";
 
-    /*
     private final static int VIDEO_CALL_SENT = 666;
     // Local preview screen position before call is connected.
     private static final int LOCAL_X_CONNECTING = 0;
@@ -39,7 +40,7 @@ public class MainActivity extends AppCompatActivity {//implements WebRtcClient.R
     private static final int REMOTE_Y = 0;
     private static final int REMOTE_WIDTH = 100;
     private static final int REMOTE_HEIGHT = 100;
-    private VideoRendererGui.ScalingType scalingType = VideoRendererGui.ScalingType.SCALE_ASPECT_FILL;
+    private RendererCommon.ScalingType scalingType = RendererCommon.ScalingType.SCALE_ASPECT_FILL;
     private GLSurfaceView vsv;
     private VideoRenderer.Callbacks localRender;
     private VideoRenderer.Callbacks remoteRender;
@@ -94,7 +95,7 @@ public class MainActivity extends AppCompatActivity {//implements WebRtcClient.R
         PeerConnectionParameters params = new PeerConnectionParameters(
                 true, false, displaySize.x, displaySize.y, 30, 1, VIDEO_CODEC_VP9, true, 1, AUDIO_CODEC_OPUS, true);
 
-        client = new WebRtcClient(this, mSocketAddress, params, VideoRendererGui.getEGLContext());
+        client = new WebRtcClient(this, this, mSocketAddress, params, null);
     }
 
     @Override
@@ -170,30 +171,35 @@ public class MainActivity extends AppCompatActivity {//implements WebRtcClient.R
     @Override
     public void onLocalStream(MediaStream localStream) {
         localStream.videoTracks.get(0).addRenderer(new VideoRenderer(localRender));
+
+        boolean mirror = true;
         VideoRendererGui.update(localRender,
                 LOCAL_X_CONNECTING, LOCAL_Y_CONNECTING,
                 LOCAL_WIDTH_CONNECTING, LOCAL_HEIGHT_CONNECTING,
-                scalingType);
+                scalingType, mirror);
     }
 
     @Override
     public void onAddRemoteStream(MediaStream remoteStream, int endPoint) {
         remoteStream.videoTracks.get(0).addRenderer(new VideoRenderer(remoteRender));
+
+        boolean mirror = true;
         VideoRendererGui.update(remoteRender,
                 REMOTE_X, REMOTE_Y,
-                REMOTE_WIDTH, REMOTE_HEIGHT, scalingType);
+                REMOTE_WIDTH, REMOTE_HEIGHT, scalingType, mirror);
         VideoRendererGui.update(localRender,
                 LOCAL_X_CONNECTED, LOCAL_Y_CONNECTED,
                 LOCAL_WIDTH_CONNECTED, LOCAL_HEIGHT_CONNECTED,
-                scalingType);
+                scalingType, mirror);
     }
 
     @Override
     public void onRemoveRemoteStream(int endPoint) {
+
+        boolean mirror = true;
         VideoRendererGui.update(localRender,
                 LOCAL_X_CONNECTING, LOCAL_Y_CONNECTING,
                 LOCAL_WIDTH_CONNECTING, LOCAL_HEIGHT_CONNECTING,
-                scalingType);
+                scalingType, mirror);
     }
-    */
 }

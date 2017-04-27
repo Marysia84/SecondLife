@@ -15,10 +15,20 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
+import com.greensoft.log.LogSubscriber;
+import com.greensoft.log.Logger;
+import com.greensoft.log.subscribers.http.HttpServerLogger;
+import com.greensoft.log.subscribers.http.NanoHTTPD;
+
 import org.json.JSONException;
 import org.webrtc.MediaStream;
 import org.webrtc.VideoRenderer;
 import org.webrtc.VideoRendererGui;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by zebul on 4/19/17.
@@ -35,7 +45,7 @@ public class SecondLifeService extends Service
     private WebRtcClient client;
     private String mSocketAddress = "http://192.168.1.10:13000/";
     private SecondLifeServiceBinder secondLifeServiceBinder = new SecondLifeServiceBinder();
-
+    private List<Restartable> restartables = new LinkedList<Restartable>();
     public class SecondLifeServiceBinder extends Binder {
         SecondLifeService getService() {
             return SecondLifeService.this;
@@ -73,13 +83,47 @@ public class SecondLifeService extends Service
     @Override
     public void onDestroy() {
 
-        if(client != null) {
-            client.onDestroy();
-        }
+        uninit();
         super.onDestroy();
     }
 
     private void init() {
+
+        if(Configuration.ENABLE_LOG_CAT){
+            LogSubscriber logSubscriber = new LogCatSubscriber();
+            Logger.addLogSubscriber(logSubscriber);
+        }
+
+        if(Configuration.ENABLE_HTTP_LOGGER){
+            AssetHttpFileReader httpFileReader = new AssetHttpFileReader(this);
+            final HttpServerLogger httpServerLogger = new HttpServerLogger(8888, httpFileReader, 100);
+            Logger.addLogSubscriber(httpServerLogger);
+            restartables.add(new Restartable() {
+                @Override
+                public void start() {
+                    try {
+                        Logger.i("service, httpServerLogger", "httpServerLogger is starting");
+                        httpServerLogger.start();
+                        Logger.i("service, httpServerLogger", "httpServerLogger started");
+                    } catch (IOException exc_) {
+
+                        Logger.removeLogSubscriber(httpServerLogger);
+                        Logger.e("service, httpServerLogger start", exc_);
+                    }
+                }
+
+                @Override
+                public void stop() {
+
+                    try{
+                        httpServerLogger.stop();
+                    } catch (Exception exc_) {
+
+                        Logger.e("service, httpServerLogger stop", exc_);
+                    }
+                }
+            });
+        }
 
         Point displaySize = new Point();
         displaySize.x = 640;
@@ -89,6 +133,20 @@ public class SecondLifeService extends Service
                 true, false, displaySize.x, displaySize.y, 30, 1, MainActivity.VIDEO_CODEC_VP9, true, 1, MainActivity.AUDIO_CODEC_OPUS, true);
 
         client = new WebRtcClient(this, this, mSocketAddress, params, null);
+
+        for(Restartable lifecycle: restartables){
+            lifecycle.start();
+        }
+    }
+
+    private void uninit() {
+        if(client != null) {
+            client.onDestroy();
+        }
+        Collections.reverse(restartables);//stop in reverse order
+        for(Restartable lifecycle: restartables){
+            lifecycle.stop();
+        }
     }
 
     @Override

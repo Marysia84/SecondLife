@@ -7,6 +7,8 @@ import java.util.LinkedList;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 import com.github.nkzawa.emitter.Emitter;
+import com.greensoft.log.Logger;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -56,7 +58,7 @@ public class WebRtcClient {
 
     private class CreateOfferCommand implements Command{
         public void execute(String peerId, JSONObject payload) throws JSONException {
-            Log.d(TAG,"CreateOfferCommand");
+            Logger.d(TAG,"CreateOfferCommand");
             Peer peer = peers.get(peerId);
             peer.pc.createOffer(peer, pcConstraints);
         }
@@ -64,7 +66,7 @@ public class WebRtcClient {
 
     private class CreateAnswerCommand implements Command{
         public void execute(String peerId, JSONObject payload) throws JSONException {
-            Log.d(TAG,"CreateAnswerCommand");
+            Logger.d(TAG,"CreateAnswerCommand");
             Peer peer = peers.get(peerId);
             SessionDescription sdp = new SessionDescription(
                     SessionDescription.Type.fromCanonicalForm(payload.getString("type")),
@@ -77,7 +79,7 @@ public class WebRtcClient {
 
     private class SetRemoteSDPCommand implements Command{
         public void execute(String peerId, JSONObject payload) throws JSONException {
-            Log.d(TAG,"SetRemoteSDPCommand");
+            Logger.d(TAG,"SetRemoteSDPCommand");
             Peer peer = peers.get(peerId);
             SessionDescription sdp = new SessionDescription(
                     SessionDescription.Type.fromCanonicalForm(payload.getString("type")),
@@ -89,7 +91,7 @@ public class WebRtcClient {
 
     private class AddIceCandidateCommand implements Command{
         public void execute(String peerId, JSONObject payload) throws JSONException {
-            Log.d(TAG,"AddIceCandidateCommand");
+            Logger.d(TAG,"AddIceCandidateCommand");
             PeerConnection pc = peers.get(peerId).pc;
             if (pc.getRemoteDescription() != null) {
                 IceCandidate candidate = new IceCandidate(
@@ -231,14 +233,14 @@ public class WebRtcClient {
 
         @Override
         public void onAddStream(MediaStream mediaStream) {
-            Log.d(TAG,"onAddStream "+mediaStream.label());
+            Logger.d(TAG,"onAddStream "+mediaStream.label());
             // remote streams are displayed from 1 to MAX_PEER (0 is localStream)
             mListener.onAddRemoteStream(mediaStream, endPoint+1);
         }
 
         @Override
         public void onRemoveStream(MediaStream mediaStream) {
-            Log.d(TAG,"onRemoveStream "+mediaStream.label());
+            Logger.d(TAG, "onRemoveStream "+mediaStream.label());
             removePeer(id);
         }
 
@@ -251,7 +253,7 @@ public class WebRtcClient {
         }
 
         public Peer(String id, int endPoint) {
-            Log.d(TAG,"new Peer: "+id + " " + endPoint);
+            Logger.d(TAG,"new Peer: "+id + " " + endPoint);
             this.pc = factory.createPeerConnection(iceServers, pcConstraints, this);
             this.id = id;
             this.endPoint = endPoint;
@@ -278,7 +280,7 @@ public class WebRtcClient {
         endPoints[peer.endPoint] = false;
     }
 
-    public WebRtcClient(Context context, RtcListener listener, String host, PeerConnectionParameters params, EGLContext mEGLcontext) {
+    public WebRtcClient(Context context, RtcListener listener, String host, PeerConnectionParameters params, EglBase.Context baseContext) {
         mListener = listener;
         pcParams = params;
         PeerConnectionFactory.initializeAndroidGlobals(context,/*listener, */true, true,
@@ -384,8 +386,8 @@ public class WebRtcClient {
         Camera.CameraInfo info = new Camera.CameraInfo();
         try {
             Camera.getCameraInfo(index, info);
-        } catch (Exception e) {
-            Log.e(TAG, "getCameraInfo failed on index " + index,e);
+        } catch (Exception exc) {
+            Logger.e(TAG, exc);
             return null;
         }
 
@@ -404,8 +406,8 @@ public class WebRtcClient {
                 Camera.getCameraInfo(i, info);
                 if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT)
                     return getDeviceName(i);
-            } catch (Exception e) {
-                Log.e(TAG, "getCameraInfo failed on index " + i, e);
+            } catch (Exception exc) {
+                Logger.e(TAG, exc);
             }
         }
         return null;
@@ -420,8 +422,8 @@ public class WebRtcClient {
                 Camera.getCameraInfo(i, info);
                 if (info.facing == Camera.CameraInfo.CAMERA_FACING_BACK)
                     return getDeviceName(i);
-            } catch (Exception e) {
-                Log.e(TAG, "getCameraInfo failed on index " + i, e);
+            } catch (Exception exc) {
+                Logger.e(TAG, exc);
             }
         }
         return null;

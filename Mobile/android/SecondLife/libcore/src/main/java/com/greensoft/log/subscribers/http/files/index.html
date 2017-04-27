@@ -1,0 +1,23 @@
+<html>
+	<head>
+		<script src='log.js'></script>
+		<script src='jquery-1.11.0.min.js'></script>
+		<script>
+		var next_index = 0;
+		$(document).ready(function(){
+			$("#clear_log_area").click(clear_log_area);
+			$("#apply_filter").click(apply_filter);
+		});
+		</script>
+		<link rel="stylesheet" type="text/css" href="log.css">
+	</head>
+	<body>
+			<button id="clear_log_area">Clear</button>
+			&nbsp;Filter token:<input type="text" id="filter_token">
+			<input type="checkbox" id="apply_filter" >Apply filter
+			<br>
+			<div class="log_area">
+				
+			</div>
+	</body>
+</html>
