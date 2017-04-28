@@ -1,12 +1,15 @@
 package com.greensoft.secondlife;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Point;
 import android.opengl.GLSurfaceView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -16,6 +19,7 @@ import org.webrtc.RendererCommon;
 import org.webrtc.VideoRenderer;
 import org.webrtc.VideoRendererGui;
 
+import java.io.Serializable;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements WebRtcClient.RtcListener{
@@ -25,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements WebRtcClient.RtcL
     public static final String AUDIO_CODEC_OPUS = "opus";
 
     private final static int VIDEO_CALL_SENT = 666;
+    private final static int CONFIGURATION_REQUEST = 999;
     // Local preview screen position before call is connected.
     private static final int LOCAL_X_CONNECTING = 0;
     private static final int LOCAL_Y_CONNECTING = 0;
@@ -42,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements WebRtcClient.RtcL
     private static final int REMOTE_HEIGHT = 100;
     private RendererCommon.ScalingType scalingType = RendererCommon.ScalingType.SCALE_ASPECT_FILL;
     private GLSurfaceView vsv;
+    private ImageButton openConfigurationImageButton;
     private VideoRenderer.Callbacks localRender;
     private VideoRenderer.Callbacks remoteRender;
     public WebRtcClient client;
@@ -71,6 +77,14 @@ public class MainActivity extends AppCompatActivity implements WebRtcClient.RtcL
             }
         });
 
+        openConfigurationImageButton = (ImageButton)findViewById(R.id.openConfigurationImageButton);
+        openConfigurationImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openSettingsActivity();
+            }
+        });
+
         // local and remote render
         remoteRender = VideoRendererGui.create(
                 REMOTE_X, REMOTE_Y,
@@ -79,12 +93,10 @@ public class MainActivity extends AppCompatActivity implements WebRtcClient.RtcL
                 LOCAL_X_CONNECTING, LOCAL_Y_CONNECTING,
                 LOCAL_WIDTH_CONNECTING, LOCAL_HEIGHT_CONNECTING, scalingType, true);
 
-        final Intent intent = getIntent();
-        final String action = intent.getAction();
-
-        if (Intent.ACTION_VIEW.equals(action)) {
-            final List<String> segments = intent.getData().getPathSegments();
-            callerId = segments.get(0);
+        ConfigurationStore configurationStore = new ConfigurationStore(this);
+        final Configuration configuration = configurationStore.load();
+        if(configuration.PeerName.length()==0){
+            openSettingsActivity();
         }
     }
 
@@ -146,9 +158,21 @@ public class MainActivity extends AppCompatActivity implements WebRtcClient.RtcL
         startCam();
     }
 
+    private void openSettingsActivity() {
+
+        Intent i = new Intent(this, ConfigurationActivity.class);
+        startActivityForResult(i, CONFIGURATION_REQUEST);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == VIDEO_CALL_SENT) {
+        if (requestCode == CONFIGURATION_REQUEST) {
+
+            if(resultCode != Activity.RESULT_OK) {
+                return;
+            }
+            final Bundle extras = data.getExtras();
+            final Configuration configuration = (Configuration)extras.getSerializable(Configuration.KEY);
             startCam();
         }
     }
@@ -202,4 +226,6 @@ public class MainActivity extends AppCompatActivity implements WebRtcClient.RtcL
                 LOCAL_WIDTH_CONNECTING, LOCAL_HEIGHT_CONNECTING,
                 scalingType, mirror);
     }
+
+
 }

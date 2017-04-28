@@ -18,12 +18,9 @@ import android.widget.Toast;
 import com.greensoft.log.LogSubscriber;
 import com.greensoft.log.Logger;
 import com.greensoft.log.subscribers.http.HttpServerLogger;
-import com.greensoft.log.subscribers.http.NanoHTTPD;
 
 import org.json.JSONException;
 import org.webrtc.MediaStream;
-import org.webrtc.VideoRenderer;
-import org.webrtc.VideoRendererGui;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -89,12 +86,12 @@ public class SecondLifeService extends Service
 
     private void init() {
 
-        if(Configuration.ENABLE_LOG_CAT){
+        if(com.greensoft.secondlife.AppConfiguration.ENABLE_LOG_CAT){
             LogSubscriber logSubscriber = new LogCatSubscriber();
             Logger.addLogSubscriber(logSubscriber);
         }
 
-        if(Configuration.ENABLE_HTTP_LOGGER){
+        if(com.greensoft.secondlife.AppConfiguration.ENABLE_HTTP_LOGGER){
             AssetHttpFileReader httpFileReader = new AssetHttpFileReader(this);
             final HttpServerLogger httpServerLogger = new HttpServerLogger(8888, httpFileReader, 100);
             Logger.addLogSubscriber(httpServerLogger);

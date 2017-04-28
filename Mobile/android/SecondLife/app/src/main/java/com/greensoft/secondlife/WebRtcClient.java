@@ -183,7 +183,9 @@ public class WebRtcClient {
                 payload.put("sdp", sdp.description);
                 sendMessage(id, sdp.type.canonicalForm(), payload);
                 pc.setLocalDescription(Peer.this, sdp);
+                Logger.d(TAG,"Peer.onCreateSuccess");
             } catch (JSONException e) {
+                Logger.e(TAG,"Peer.onCreateSuccess: "+e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -202,6 +204,8 @@ public class WebRtcClient {
 
         @Override
         public void onIceConnectionChange(PeerConnection.IceConnectionState iceConnectionState) {
+
+            Logger.d(TAG,"Peer.onIceConnectionChange: "+iceConnectionState);
             if(iceConnectionState == PeerConnection.IceConnectionState.DISCONNECTED) {
                 removePeer(id);
                 mListener.onStatusChanged("DISCONNECTED");
@@ -216,7 +220,9 @@ public class WebRtcClient {
         }
 
         @Override
-        public void onIceGatheringChange(PeerConnection.IceGatheringState iceGatheringState) {}
+        public void onIceGatheringChange(PeerConnection.IceGatheringState iceGatheringState) {
+            Logger.d(TAG,"Peer.onIceGatheringChange: "+iceGatheringState);
+        }
 
         @Override
         public void onIceCandidate(final IceCandidate candidate) {
@@ -226,7 +232,9 @@ public class WebRtcClient {
                 payload.put("id", candidate.sdpMid);
                 payload.put("candidate", candidate.sdp);
                 sendMessage(id, "candidate", payload);
+                Logger.d(TAG,"Peer.onIceCandidate: "+candidate);
             } catch (JSONException e) {
+                Logger.e(TAG,"Peer.onIceCandidate: "+e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -245,19 +253,21 @@ public class WebRtcClient {
         }
 
         @Override
-        public void onDataChannel(DataChannel dataChannel) {}
+        public void onDataChannel(DataChannel dataChannel) {
+
+            Logger.d(TAG,"Peer.onDataChannel");
+        }
 
         @Override
         public void onRenegotiationNeeded() {
 
+            Logger.d(TAG,"Peer.onRenegotiationNeeded");
         }
 
         public Peer(String id, int endPoint) {
-            Logger.d(TAG,"new Peer: "+id + " " + endPoint);
             this.pc = factory.createPeerConnection(iceServers, pcConstraints, this);
             this.id = id;
             this.endPoint = endPoint;
-
             pc.addStream(localMS); //, new MediaConstraints()
 
             mListener.onStatusChanged("CONNECTING");
@@ -265,14 +275,17 @@ public class WebRtcClient {
     }
 
     private Peer addPeer(String id, int endPoint) {
+
+        Logger.d(TAG,"add peer: "+id + " " + endPoint);
         Peer peer = new Peer(id, endPoint);
         peers.put(id, peer);
-
         endPoints[endPoint] = true;
         return peer;
     }
 
     private void removePeer(String id) {
+
+        Logger.d(TAG,"remove peer: "+id);
         Peer peer = peers.get(id);
         mListener.onRemoveRemoteStream(peer.endPoint);
         peer.pc.close();
