@@ -173,7 +173,13 @@ public class MainActivity extends AppCompatActivity implements WebRtcClient.RtcL
             }
             final Bundle extras = data.getExtras();
             final Configuration configuration = (Configuration)extras.getSerializable(Configuration.KEY);
-            startCam();
+            try {
+                answer("ERPthmRJVZs-bLWhAAAA");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            //startCam();
+
         }
     }
 
