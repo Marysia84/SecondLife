@@ -65,7 +65,8 @@ public class MainActivity extends AppCompatActivity implements WebRtcClient.RtcL
                         | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                         | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
         setContentView(R.layout.activity_main);
-        mSocketAddress = "http://192.168.1.10:13000/";
+        //mSocketAddress = "http://192.168.1.10:13000/";
+        mSocketAddress = "http://192.168.1.106:13000/";
 
         vsv = (GLSurfaceView) findViewById(R.id.glSurfaceView);
         vsv.setPreserveEGLContextOnPause(true);
