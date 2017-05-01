@@ -2,4 +2,5 @@
     <string name="app_name">SecondLife</string>
     <string name="title_activity_clock">ClockActivity</string>
     <string name="title_activity_configuration">ConfigurationActivity</string>
+    <string name="title_activity_demo">DemoActivity</string>
 </resources>

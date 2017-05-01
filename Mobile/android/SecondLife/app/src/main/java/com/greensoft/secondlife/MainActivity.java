@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Point;
 import android.opengl.GLSurfaceView;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -21,6 +23,7 @@ import org.webrtc.VideoRendererGui;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements WebRtcClient.RtcListener{
 
@@ -139,6 +142,13 @@ public class MainActivity extends AppCompatActivity implements WebRtcClient.RtcL
 
     @Override
     public void onCallReady(String callId) {
+
+        try {
+            client.fetchClients();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         if (callerId != null) {
             try {
                 answer(callerId);
@@ -186,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements WebRtcClient.RtcL
 
     public void startCam() {
         // Camera settings
-        client.start("android_test");
+        client.start(getDeviceName());
     }
 
     @Override
@@ -234,5 +244,43 @@ public class MainActivity extends AppCompatActivity implements WebRtcClient.RtcL
                 scalingType, mirror);
     }
 
+    @Override
+    public void onClientsFetched(Map<String, String> clients) {
+
+        int foo = 1;
+        int bar = foo;
+    }
+
+    /** Returns the consumer friendly device name */
+    public static String getDeviceName() {
+        String manufacturer = Build.MANUFACTURER;
+        String model = Build.MODEL;
+        if (model.startsWith(manufacturer)) {
+            return capitalize(model);
+        }
+        return capitalize(manufacturer) + " " + model;
+    }
+
+    private static String capitalize(String str) {
+        if (TextUtils.isEmpty(str)) {
+            return str;
+        }
+        char[] arr = str.toCharArray();
+        boolean capitalizeNext = true;
+
+        StringBuilder phrase = new StringBuilder();
+        for (char c : arr) {
+            if (capitalizeNext && Character.isLetter(c)) {
+                phrase.append(Character.toUpperCase(c));
+                capitalizeNext = false;
+                continue;
+            } else if (Character.isWhitespace(c)) {
+                capitalizeNext = true;
+            }
+            phrase.append(c);
+        }
+
+        return phrase.toString();
+    }
 
 }

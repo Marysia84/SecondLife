@@ -3,12 +3,14 @@ package com.greensoft.secondlife;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 import com.github.nkzawa.emitter.Emitter;
 import com.greensoft.log.Logger;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -50,6 +52,8 @@ public class WebRtcClient {
         void onAddRemoteStream(MediaStream remoteStream, int endPoint);
 
         void onRemoveRemoteStream(int endPoint);
+
+        void onClientsFetched(Map<String, String> clients);
     }
 
     private interface Command{
@@ -120,6 +124,11 @@ public class WebRtcClient {
         client.emit("message", message);
     }
 
+    public void fetchClients() throws JSONException {
+        JSONObject message = new JSONObject();
+        client.emit("fetch_clients", message);
+    }
+
     private class MessageHandler {
         private HashMap<String, Command> commandMap;
 
@@ -165,6 +174,25 @@ public class WebRtcClient {
             public void call(Object... args) {
                 String id = (String) args[0];
                 mListener.onCallReady(id);
+            }
+        };
+
+        private Emitter.Listener onFetchClients = new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Map<String, String> clients = new HashMap<>();
+                JSONArray clientsArray = (JSONArray) args[0];
+                for(int i=0; i<clientsArray.length(); i++){
+                    try {
+                        JSONObject jsonObject = (JSONObject)clientsArray.get(i);
+                        String id = jsonObject.getString("id");
+                        String name = jsonObject.getString("name");
+                        clients.put(id, name);
+                    } catch (JSONException e) {
+
+                    }
+                }
+                mListener.onClientsFetched(clients);
             }
         };
     }
@@ -308,6 +336,7 @@ public class WebRtcClient {
         }
         client.on("id", messageHandler.onId);
         client.on("message", messageHandler.onMessage);
+        client.on("fetch_clients", messageHandler.onFetchClients);
         client.connect();
 
         iceServers.add(new PeerConnection.IceServer("stun:23.21.150.121"));

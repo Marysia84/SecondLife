@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by zebul on 4/19/17.
@@ -221,6 +222,11 @@ public class SecondLifeService extends Service
 
         int foo = 1;
         int bar = foo;
+    }
+
+    @Override
+    public void onClientsFetched(Map<String, String> clients) {
+
     }
 
     final Handler handler = new Handler(new Handler.Callback() {

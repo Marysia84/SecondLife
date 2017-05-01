@@ -16,6 +16,10 @@
         <activity
             android:name=".ConfigurationActivity"
             android:label="@string/title_activity_configuration"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".DemoActivity"
+            android:label="@string/title_activity_demo"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
