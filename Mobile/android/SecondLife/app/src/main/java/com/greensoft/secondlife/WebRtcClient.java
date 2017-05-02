@@ -157,7 +157,12 @@ public class WebRtcClient {
                         int endPoint = findEndPoint();
                         if(endPoint != MAX_PEER) {
                             Peer peer = addPeer(from, endPoint);
-                            peer.pc.addStream(localMS);
+                            //TODO
+                            if(localMS != null){
+
+                                peer.pc.addStream(localMS);
+                            }
+
                             commandMap.get(type).execute(from, payload);
                         }
                     } else {
@@ -296,7 +301,10 @@ public class WebRtcClient {
             this.pc = factory.createPeerConnection(iceServers, pcConstraints, this);
             this.id = id;
             this.endPoint = endPoint;
-            pc.addStream(localMS); //, new MediaConstraints()
+            if(localMS != null){
+
+                pc.addStream(localMS); //, new MediaConstraints()
+            }
 
             mListener.onStatusChanged("CONNECTING");
         }

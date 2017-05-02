@@ -13,6 +13,7 @@ import android.widget.EditText;
 public class ConfigurationActivity extends AppCompatActivity {
 
     private EditText peerNameEditText;
+    private EditText serverAddressEditText;
     private Button saveConfigurationButton;
 
     @Override
@@ -20,6 +21,7 @@ public class ConfigurationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_configuration);
         peerNameEditText = (EditText) findViewById(R.id.peerNameEditText);
+        serverAddressEditText = (EditText)findViewById(R.id.serverAddressEditText);
         saveConfigurationButton = (Button) findViewById(R.id.saveConfigurationButton);
         saveConfigurationButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,10 +58,12 @@ public class ConfigurationActivity extends AppCompatActivity {
     private void configuration2UI(Configuration configuration) {
 
         peerNameEditText.setText(configuration.PeerName);
+        serverAddressEditText.setText(configuration.ServerAddress);
     }
 
     private void UI2Configuration(Configuration configuration) {
 
         configuration.PeerName = peerNameEditText.getText().toString();
+        configuration.ServerAddress = serverAddressEditText.getText().toString();
     }
 }

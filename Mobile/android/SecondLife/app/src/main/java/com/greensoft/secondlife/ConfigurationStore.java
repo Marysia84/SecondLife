@@ -11,6 +11,7 @@ public class ConfigurationStore {
 
     private static final String CONFIGURATION_PREF = "CONFIGURATION_PREF";
     private static final String KEY_PEER_NAME = "KEY_PEER_NAME";
+    private static final String KEY_SERVER_ADDRESS = "KEY_SERVER_ADDRESS";
 
 
     private Context context;
@@ -23,6 +24,8 @@ public class ConfigurationStore {
         SharedPreferences sharedPreferences = createSharedPreferences();
         Configuration configuration = new Configuration();
         configuration.PeerName = sharedPreferences.getString(KEY_PEER_NAME, "");
+        configuration.ServerAddress = sharedPreferences.getString(
+                KEY_SERVER_ADDRESS, "http://192.168.1.10:13000/");
         return configuration;
     }
 
@@ -31,6 +34,7 @@ public class ConfigurationStore {
         SharedPreferences sharedPreferences = createSharedPreferences();
         final SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(KEY_PEER_NAME, configuration.PeerName);
+        editor.putString(KEY_SERVER_ADDRESS, configuration.ServerAddress);
         editor.commit();
     }
 

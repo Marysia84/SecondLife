@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements WebRtcClient.RtcL
     public static final String AUDIO_CODEC_OPUS = "opus";
 
     private final static int VIDEO_CALL_SENT = 666;
-    private final static int CONFIGURATION_REQUEST = 999;
+    public final static int CONFIGURATION_REQUEST = 999;
     // Local preview screen position before call is connected.
     private static final int LOCAL_X_CONNECTING = 0;
     private static final int LOCAL_Y_CONNECTING = 0;
@@ -44,10 +44,10 @@ public class MainActivity extends AppCompatActivity implements WebRtcClient.RtcL
     private static final int LOCAL_WIDTH_CONNECTED = 25;
     private static final int LOCAL_HEIGHT_CONNECTED = 25;
     // Remote video screen position
-    private static final int REMOTE_X = 0;
-    private static final int REMOTE_Y = 0;
-    private static final int REMOTE_WIDTH = 100;
-    private static final int REMOTE_HEIGHT = 100;
+    public static final int REMOTE_X = 0;
+    public static final int REMOTE_Y = 0;
+    public static final int REMOTE_WIDTH = 100;
+    public static final int REMOTE_HEIGHT = 100;
     private RendererCommon.ScalingType scalingType = RendererCommon.ScalingType.SCALE_ASPECT_FILL;
     private GLSurfaceView vsv;
     private ImageButton openConfigurationImageButton;

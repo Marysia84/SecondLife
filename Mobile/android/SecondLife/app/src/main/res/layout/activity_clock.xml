@@ -16,4 +16,9 @@
         android:textSize = "24sp"
         android:layout_centerInParent="true"/>
 
+    <ImageButton
+        android:id="@+id/openConfigurationImageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@mipmap/ic_settings_black_36dp"/>
 </RelativeLayout>

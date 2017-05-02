@@ -1,5 +1,6 @@
 package com.greensoft.secondlife;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -17,13 +18,19 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.DigitalClock;
+import android.widget.ImageButton;
 import android.widget.TextView;
+
+import org.json.JSONException;
+
+import static com.greensoft.secondlife.MainActivity.CONFIGURATION_REQUEST;
 
 public class ClockActivity extends AppCompatActivity {
 
     private boolean serviceBound = false;
     private SecondLifeService secondLifeService;
     private DigitalClock digitalClock;
+    private ImageButton openConfigurationImageButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +44,15 @@ public class ClockActivity extends AppCompatActivity {
                         | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
         setContentView(R.layout.activity_clock);
         digitalClock = (DigitalClock)findViewById(R.id.digitalClock);
+        openConfigurationImageButton = (ImageButton)findViewById(R.id.openConfigurationImageButton);
+        openConfigurationImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                openSettingsActivity();
+            }
+        });
+
     }
 
     @Override
@@ -141,4 +157,23 @@ public class ClockActivity extends AppCompatActivity {
         }
     };
 
+    private void openSettingsActivity() {
+
+        Intent i = new Intent(this, ConfigurationActivity.class);
+        startActivityForResult(i, CONFIGURATION_REQUEST);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == CONFIGURATION_REQUEST) {
+
+            /*
+            if(resultCode != Activity.RESULT_OK) {
+                return;
+            }
+            final Bundle extras = data.getExtras();
+            final Configuration configuration = (Configuration)extras.getSerializable(Configuration.KEY);
+            */
+        }
+    }
 }

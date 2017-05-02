@@ -41,7 +41,6 @@ public class SecondLifeService extends Service
 
     private String callerId;
     private WebRtcClient client;
-    private String mSocketAddress = "http://192.168.1.10:13000/";
     private SecondLifeServiceBinder secondLifeServiceBinder = new SecondLifeServiceBinder();
     private List<Restartable> restartables = new LinkedList<Restartable>();
     public class SecondLifeServiceBinder extends Binder {
@@ -87,6 +86,11 @@ public class SecondLifeService extends Service
 
     private void init() {
 
+        ConfigurationStore configurationStore = new ConfigurationStore(this);
+        Configuration configuration = configurationStore.load();
+        showTextMessageAsToast("Service will connect to: "+configuration.ServerAddress);
+        //configuration
+
         if(com.greensoft.secondlife.AppConfiguration.ENABLE_LOG_CAT){
             LogSubscriber logSubscriber = new LogCatSubscriber();
             Logger.addLogSubscriber(logSubscriber);
@@ -130,7 +134,7 @@ public class SecondLifeService extends Service
         PeerConnectionParameters params = new PeerConnectionParameters(
                 true, false, displaySize.x, displaySize.y, 30, 1, MainActivity.VIDEO_CODEC_VP9, true, 1, MainActivity.AUDIO_CODEC_OPUS, true);
 
-        client = new WebRtcClient(this, this, mSocketAddress, params, null);
+        client = new WebRtcClient(this, this, configuration.ServerAddress, params, null);
 
         for(Restartable lifecycle: restartables){
             lifecycle.start();

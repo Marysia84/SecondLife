@@ -10,4 +10,5 @@ public class Configuration implements Serializable {
 
     public static final String KEY = "KEY_CONFIGURATION";
     public String PeerName;
+    public String ServerAddress;
 }
