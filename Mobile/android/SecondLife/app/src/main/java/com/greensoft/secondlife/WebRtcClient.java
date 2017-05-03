@@ -108,6 +108,14 @@ public class WebRtcClient {
         }
     }
 
+    private class RestartVideoStreamCommand implements Command{
+        public void execute(String peerId, JSONObject payload) throws JSONException {
+            Logger.d(TAG,"RestartVideoStreamCommand");
+            PeerConnection pc = peers.get(peerId).pc;
+            videoSource.restart();
+        }
+    }
+
     /**
      * Send a message through the signaling server
      *
@@ -138,6 +146,7 @@ public class WebRtcClient {
             commandMap.put("offer", new CreateAnswerCommand());
             commandMap.put("answer", new SetRemoteSDPCommand());
             commandMap.put("candidate", new AddIceCandidateCommand());
+            commandMap.put("restartVideoStream", new RestartVideoStreamCommand());
         }
 
         private Emitter.Listener onMessage = new Emitter.Listener() {
@@ -149,7 +158,12 @@ public class WebRtcClient {
                     String type = data.getString("type");
                     JSONObject payload = null;
                     if(!type.equals("init")) {
-                        payload = data.getJSONObject("payload");
+                        try {
+                            payload = data.getJSONObject("payload");
+                        }
+                        catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
                     // if peer is unknown, try to add him
                     if(!peers.containsKey(from)) {

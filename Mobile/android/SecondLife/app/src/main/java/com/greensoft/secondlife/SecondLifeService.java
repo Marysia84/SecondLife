@@ -38,6 +38,7 @@ public class SecondLifeService extends Service
     private static final int EXECUTE_COMMAND = 1;
     private static final int SERVICE_NOTIFICATION_ID = 1;
     private static final String SERVICE_NAME = SecondLifeService.class.getSimpleName();
+    private static final String TAG = SERVICE_NAME;
 
     private String callerId;
     private WebRtcClient client;
@@ -104,13 +105,13 @@ public class SecondLifeService extends Service
                 @Override
                 public void start() {
                     try {
-                        Logger.i("service, httpServerLogger", "httpServerLogger is starting");
+                        Logger.i(TAG, "httpServerLogger is starting");
                         httpServerLogger.start();
-                        Logger.i("service, httpServerLogger", "httpServerLogger started");
+                        Logger.i(TAG, "httpServerLogger started");
                     } catch (IOException exc_) {
 
                         Logger.removeLogSubscriber(httpServerLogger);
-                        Logger.e("service, httpServerLogger start", exc_);
+                        Logger.e(TAG, exc_);
                     }
                 }
 
@@ -121,7 +122,7 @@ public class SecondLifeService extends Service
                         httpServerLogger.stop();
                     } catch (Exception exc_) {
 
-                        Logger.e("service, httpServerLogger stop", exc_);
+                        Logger.e(TAG, exc_);
                     }
                 }
             });
@@ -217,15 +218,15 @@ public class SecondLifeService extends Service
     @Override
     public void onAddRemoteStream(MediaStream remoteStream, int endPoint) {
 
-        int foo = 1;
-        int bar = foo;
+        showTextMessageAsToast("onAddRemoteStream");
+        Logger.i(TAG, "onAddRemoteStream");
     }
 
     @Override
     public void onRemoveRemoteStream(int endPoint) {
 
-        int foo = 1;
-        int bar = foo;
+        showTextMessageAsToast("onRemoveRemoteStream");
+        Logger.i(TAG, "onRemoveRemoteStream");
     }
 
     @Override
