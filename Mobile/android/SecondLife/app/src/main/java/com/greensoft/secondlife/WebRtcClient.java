@@ -156,6 +156,7 @@ public class WebRtcClient {
                 try {
                     String from = data.getString("from");
                     String type = data.getString("type");
+                    Logger.d(TAG,"onMessage from: "+from+", type: "+type);
                     JSONObject payload = null;
                     if(!type.equals("init")) {
                         try {
@@ -253,7 +254,10 @@ public class WebRtcClient {
         public void onIceConnectionChange(PeerConnection.IceConnectionState iceConnectionState) {
 
             Logger.d(TAG,"Peer.onIceConnectionChange: "+iceConnectionState);
-            if(iceConnectionState == PeerConnection.IceConnectionState.DISCONNECTED) {
+            boolean removePeer =
+                    (iceConnectionState == PeerConnection.IceConnectionState.DISCONNECTED)||
+                    (iceConnectionState == PeerConnection.IceConnectionState.FAILED);
+            if(removePeer) {
                 removePeer(id);
                 mListener.onStatusChanged("DISCONNECTED");
             }
@@ -361,8 +365,25 @@ public class WebRtcClient {
         client.on("fetch_clients", messageHandler.onFetchClients);
         client.connect();
 
+        /*
+          // draft-nandakumar-rtcweb-stun-uri-01
+          // stunURI       = scheme ":" stun-host [ ":" stun-port ]
+          // scheme        = "stun" / "stuns"
+          // stun-host     = IP-literal / IPv4address / reg-name
+          // stun-port     = *DIGIT
+          // draft-petithuguenin-behave-turn-uris-01
+          // turnURI       = scheme ":" turn-host [ ":" turn-port ]
+          //                 [ "?transport=" transport ]
+          // scheme        = "turn" / "turns"
+          // transport     = "udp" / "tcp" / transport-ext
+          // transport-ext = 1*unreserved
+          // turn-host     = IP-literal / IPv4address / reg-name
+          // turn-port     = *DIGIT
+        */
         iceServers.add(new PeerConnection.IceServer("stun:23.21.150.121"));
         iceServers.add(new PeerConnection.IceServer("stun:stun.l.google.com:19302"));
+
+        //iceServers.add(new PeerConnection.IceServer("turns:rojarand.ddns.net:19302", "zebul", "szefu1"));
 
         pcConstraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"));
         pcConstraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"));
