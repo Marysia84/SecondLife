@@ -39,6 +39,49 @@ public class WebRtcClient {
     private RtcListener mListener;
     private Socket client;
 
+    public WebRtcClient(Context context, RtcListener listener, String host, PeerConnectionParameters params, EglBase.Context baseContext) {
+        mListener = listener;
+        pcParams = params;
+        PeerConnectionFactory.initializeAndroidGlobals(context,/*listener, */true, true,
+                params.videoCodecHwAcceleration/*, mEGLcontext*/);
+        factory = new PeerConnectionFactory();
+        MessageHandler messageHandler = new MessageHandler();
+
+        try {
+            client = IO.socket(host);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        client.on("id", messageHandler.onId);
+        client.on("message", messageHandler.onMessage);
+        client.on("fetch_clients", messageHandler.onFetchClients);
+        client.connect();
+
+        /*
+          // draft-nandakumar-rtcweb-stun-uri-01
+          // stunURI       = scheme ":" stun-host [ ":" stun-port ]
+          // scheme        = "stun" / "stuns"
+          // stun-host     = IP-literal / IPv4address / reg-name
+          // stun-port     = *DIGIT
+          // draft-petithuguenin-behave-turn-uris-01
+          // turnURI       = scheme ":" turn-host [ ":" turn-port ]
+          //                 [ "?transport=" transport ]
+          // scheme        = "turn" / "turns"
+          // transport     = "udp" / "tcp" / transport-ext
+          // transport-ext = 1*unreserved
+          // turn-host     = IP-literal / IPv4address / reg-name
+          // turn-port     = *DIGIT
+        */
+        iceServers.add(new PeerConnection.IceServer("stun:23.21.150.121"));
+        iceServers.add(new PeerConnection.IceServer("stun:stun.l.google.com:19302"));
+
+        //iceServers.add(new PeerConnection.IceServer("turns:rojarand.ddns.net:19302", "zebul", "szefu1"));
+
+        pcConstraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"));
+        pcConstraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"));
+        pcConstraints.optional.add(new MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true"));
+    }
+
     /**
      * Implement this interface to be notified of events.
      */
@@ -111,7 +154,8 @@ public class WebRtcClient {
     private class RestartVideoStreamCommand implements Command{
         public void execute(String peerId, JSONObject payload) throws JSONException {
             Logger.d(TAG,"RestartVideoStreamCommand");
-            PeerConnection pc = peers.get(peerId).pc;
+
+            videoSource.stop();
             videoSource.restart();
         }
     }
@@ -222,6 +266,18 @@ public class WebRtcClient {
         private String id;
         private int endPoint;
 
+        public Peer(String id, int endPoint) {
+            this.pc = factory.createPeerConnection(iceServers, pcConstraints, this);
+            this.id = id;
+            this.endPoint = endPoint;
+            if(localMS != null){
+
+                pc.addStream(localMS); //, new MediaConstraints()
+            }
+
+            mListener.onStatusChanged("CONNECTING");
+        }
+
         @Override
         public void onCreateSuccess(final SessionDescription sdp) {
             // TODO: modify sdp to use pcParams prefered codecs
@@ -314,18 +370,6 @@ public class WebRtcClient {
 
             Logger.d(TAG,"Peer.onRenegotiationNeeded");
         }
-
-        public Peer(String id, int endPoint) {
-            this.pc = factory.createPeerConnection(iceServers, pcConstraints, this);
-            this.id = id;
-            this.endPoint = endPoint;
-            if(localMS != null){
-
-                pc.addStream(localMS); //, new MediaConstraints()
-            }
-
-            mListener.onStatusChanged("CONNECTING");
-        }
     }
 
     private Peer addPeer(String id, int endPoint) {
@@ -345,49 +389,6 @@ public class WebRtcClient {
         peer.pc.close();
         peers.remove(peer.id);
         endPoints[peer.endPoint] = false;
-    }
-
-    public WebRtcClient(Context context, RtcListener listener, String host, PeerConnectionParameters params, EglBase.Context baseContext) {
-        mListener = listener;
-        pcParams = params;
-        PeerConnectionFactory.initializeAndroidGlobals(context,/*listener, */true, true,
-                params.videoCodecHwAcceleration/*, mEGLcontext*/);
-        factory = new PeerConnectionFactory();
-        MessageHandler messageHandler = new MessageHandler();
-
-        try {
-            client = IO.socket(host);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        client.on("id", messageHandler.onId);
-        client.on("message", messageHandler.onMessage);
-        client.on("fetch_clients", messageHandler.onFetchClients);
-        client.connect();
-
-        /*
-          // draft-nandakumar-rtcweb-stun-uri-01
-          // stunURI       = scheme ":" stun-host [ ":" stun-port ]
-          // scheme        = "stun" / "stuns"
-          // stun-host     = IP-literal / IPv4address / reg-name
-          // stun-port     = *DIGIT
-          // draft-petithuguenin-behave-turn-uris-01
-          // turnURI       = scheme ":" turn-host [ ":" turn-port ]
-          //                 [ "?transport=" transport ]
-          // scheme        = "turn" / "turns"
-          // transport     = "udp" / "tcp" / transport-ext
-          // transport-ext = 1*unreserved
-          // turn-host     = IP-literal / IPv4address / reg-name
-          // turn-port     = *DIGIT
-        */
-        iceServers.add(new PeerConnection.IceServer("stun:23.21.150.121"));
-        iceServers.add(new PeerConnection.IceServer("stun:stun.l.google.com:19302"));
-
-        //iceServers.add(new PeerConnection.IceServer("turns:rojarand.ddns.net:19302", "zebul", "szefu1"));
-
-        pcConstraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"));
-        pcConstraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"));
-        pcConstraints.optional.add(new MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true"));
     }
 
     /**
@@ -456,7 +457,6 @@ public class WebRtcClient {
 
         AudioSource audioSource = factory.createAudioSource(new MediaConstraints());
         localMS.addTrack(factory.createAudioTrack("ARDAMSa0", audioSource));
-
         mListener.onLocalStream(localMS);
     }
 
