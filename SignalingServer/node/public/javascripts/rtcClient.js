@@ -6,6 +6,7 @@ var PeerManager = (function () {
           iceServers: [
             {"url": "stun:23.21.150.121"},
             {"url": "stun:stun.l.google.com:19302"}
+            ,{"url":"turn:rojarand.ddns.net:23478", "username":"foobar", "credential":"foobar"}
           ]
         },
         peerConnectionConstraints: {

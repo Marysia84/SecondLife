@@ -74,8 +74,7 @@ public class WebRtcClient {
         */
         iceServers.add(new PeerConnection.IceServer("stun:23.21.150.121"));
         iceServers.add(new PeerConnection.IceServer("stun:stun.l.google.com:19302"));
-
-        //iceServers.add(new PeerConnection.IceServer("turns:rojarand.ddns.net:19302", "zebul", "szefu1"));
+        iceServers.add(new PeerConnection.IceServer("turn:rojarand.ddns.net:23478", "zebul", "szefu1"));
 
         pcConstraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"));
         pcConstraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"));

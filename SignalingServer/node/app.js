@@ -14,7 +14,12 @@ var favicon = require('serve-favicon')
 var app = express();
 
 // all environments
-app.set('port', process.env.PORT || 13000);
+var port = 13000;
+if(process.argv.length >=3 ){
+  port = process.argv[2];
+}
+//app.set('port', process.env.PORT || 13000);
+app.set('port', port);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(favicon(__dirname + '/public/images/favicon.ico'));
