@@ -10,17 +10,17 @@ import org.webrtc.SessionDescription;
 public class RTCController {
 
     private Peers peers = new Peers();
-    private RTCConnector rtcConnector;
+    private RTCConnectionBuilder rtcConnectionBuilder;
 
-    public RTCController(RTCConnector rtcConnector){
+    public RTCController(RTCConnectionBuilder rtcConnectionBuilder){
 
-        this.rtcConnector = rtcConnector;
+        this.rtcConnectionBuilder = rtcConnectionBuilder;
     }
 
     public void restart(){
 
-        rtcConnector.turnOff();
-        rtcConnector.turnOn();
+        rtcConnectionBuilder.turnOff();
+        rtcConnectionBuilder.turnOn();
     }
 
     public boolean containsPeer(PeerId peerId){
@@ -30,8 +30,8 @@ public class RTCController {
 
     public void addPeer(PeerId peerId){
 
-        if(!rtcConnector.isTurnedOn()){
-            rtcConnector.turnOn();
+        if(!rtcConnectionBuilder.isTurnedOn()){
+            rtcConnectionBuilder.turnOn();
         }
 
         Peer peer = createPeer(peerId);
@@ -44,7 +44,7 @@ public class RTCController {
         Peer peer = peers.remove(peerId);
         peer.closeConnection();
         if(peers.isEmpty()){
-            rtcConnector.turnOff();
+            rtcConnectionBuilder.turnOff();
         }
     }
 
@@ -84,7 +84,7 @@ public class RTCController {
 
     private Peer createPeer(PeerId peerId) {
 
-        RTCConnection rtcConnection = rtcConnector.createRTCConnection(peerId);
+        RTCConnection rtcConnection = rtcConnectionBuilder.buildRTCConnection(peerId);
         Peer peer = new Peer(peerId, rtcConnection);
         return peer;
     }

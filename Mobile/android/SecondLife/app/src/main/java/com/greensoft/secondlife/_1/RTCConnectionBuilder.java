@@ -19,7 +19,7 @@ import java.util.LinkedList;
  * Created by zebul on 5/16/17.
  */
 
-public class RTCConnector {
+public class RTCConnectionBuilder {
 
     private static boolean GLOBALS_INITIALIZED = false;
     private MediaConstraints mediaConstraints = new MediaConstraints();
@@ -33,10 +33,10 @@ public class RTCConnector {
     private PeerConnectionParameters pcParams;
     private boolean turnedOn;
 
-    public RTCConnector(Context appContext,
-                        PeerConnectionObserverFactory peerConnectionObserverFactory,
-                        SdpObserverFactory sdpObserverFactory,
-                        PeerConnectionParameters params){
+    public RTCConnectionBuilder(Context appContext,
+                                PeerConnectionObserverFactory peerConnectionObserverFactory,
+                                SdpObserverFactory sdpObserverFactory,
+                                PeerConnectionParameters params){
 
         if(!GLOBALS_INITIALIZED){
             PeerConnectionFactory.initializeAndroidGlobals(appContext,/*listener, */true, true, params.videoCodecHwAcceleration/*, mEGLcontext*/);
@@ -93,7 +93,7 @@ public class RTCConnector {
         factory.dispose();
     }
 
-    public RTCConnection createRTCConnection(
+    public RTCConnection buildRTCConnection(
             PeerId peerId) {
 
         final PeerConnection.Observer peerConnectionObserver =
@@ -101,6 +101,7 @@ public class RTCConnector {
         final PeerConnection peerConnection = factory.createPeerConnection(
                 iceServers, mediaConstraints, peerConnectionObserver);
 
+        peerConnection.addStream(localMediaStream);
         final SdpObserver sdpObserver = sdpObserverFactory.createSdpObserver(peerId);
         RTCConnection rtcConnection = new RTCConnection(peerConnection, mediaConstraints, sdpObserver);
         return rtcConnection;

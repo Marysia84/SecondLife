@@ -8,7 +8,6 @@ import com.github.nkzawa.socketio.client.Socket;
 import com.greensoft.log.Logger;
 import com.greensoft.secondlife.PeerConnectionParameters;
 import com.greensoft.secondlife.Restartable;
-import com.greensoft.secondlife.WebRtcClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,10 +39,10 @@ public class RTCOrchestrator implements Restartable {
 
     public RTCOrchestrator(Context context, String host, PeerConnectionParameters params){
 
-        RTCConnector rtcConnector = new RTCConnector(
+        RTCConnectionBuilder rtcConnectionBuilder = new RTCConnectionBuilder(
                 context, peerConnectionObserverFactory, sdpObserverFactory, params);
 
-        rtcController = new RTCController(rtcConnector);
+        rtcController = new RTCController(rtcConnectionBuilder);
         this.host = host;
         this.commandMap = new HashMap<>();
         commandMap.put("init", new CreateOfferCommand());

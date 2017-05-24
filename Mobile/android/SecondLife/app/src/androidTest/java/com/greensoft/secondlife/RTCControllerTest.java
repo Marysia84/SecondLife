@@ -7,7 +7,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.greensoft.secondlife._1.PeerConnectionObserverFactory;
 import com.greensoft.secondlife._1.PeerId;
-import com.greensoft.secondlife._1.RTCConnector;
+import com.greensoft.secondlife._1.RTCConnectionBuilder;
 import com.greensoft.secondlife._1.RTCController;
 import com.greensoft.secondlife._1.SdpObserverFactory;
 
@@ -32,7 +32,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(AndroidJUnit4.class)
 public class RTCControllerTest {
 
-    private RTCConnector rtcConnector;
+    private RTCConnectionBuilder rtcConnectionBuilder;
     private RTCController rtcController;
 
     @Before
@@ -48,9 +48,9 @@ public class RTCControllerTest {
         PeerConnectionParameters params = new PeerConnectionParameters(
                 true, false, displaySize.x, displaySize.y, 30, 1, MainActivity.VIDEO_CODEC_VP9, true, 1, MainActivity.AUDIO_CODEC_OPUS, true);
 
-        rtcConnector =
-                new RTCConnector(appContext, peerConnectionObserverFactory, sdpObserverFactory, params);
-        rtcController = new RTCController(rtcConnector);
+        rtcConnectionBuilder =
+                new RTCConnectionBuilder(appContext, peerConnectionObserverFactory, sdpObserverFactory, params);
+        rtcController = new RTCController(rtcConnectionBuilder);
     }
 
     @Test
@@ -60,7 +60,7 @@ public class RTCControllerTest {
         final PeerId peerId = new PeerId("foo");
         rtcController.addPeer(peerId);
         //then
-        assertTrue(rtcConnector.isTurnedOn());
+        assertTrue(rtcConnectionBuilder.isTurnedOn());
     }
 
     @Test
@@ -77,7 +77,7 @@ public class RTCControllerTest {
         }
 
         //then
-        assertFalse(rtcConnector.isTurnedOn());
+        assertFalse(rtcConnectionBuilder.isTurnedOn());
     }
 
     SdpObserverFactory sdpObserverFactory = new SdpObserverFactory(){
