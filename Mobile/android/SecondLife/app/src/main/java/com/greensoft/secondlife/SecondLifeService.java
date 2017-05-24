@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.greensoft.log.LogSubscriber;
 import com.greensoft.log.Logger;
 import com.greensoft.log.subscribers.http.HttpServerLogger;
+import com.greensoft.secondlife._1.RTCOrchestrator;
 
 import org.json.JSONException;
 import org.webrtc.MediaStream;
@@ -41,7 +42,8 @@ public class SecondLifeService extends Service
     private static final String TAG = SERVICE_NAME;
 
     private String callerId;
-    private WebRtcClient client;
+    //private WebRtcClient client;
+    private RTCOrchestrator rtcOrchestrator;
     private SecondLifeServiceBinder secondLifeServiceBinder = new SecondLifeServiceBinder();
     private List<Restartable> restartables = new LinkedList<Restartable>();
     public class SecondLifeServiceBinder extends Binder {
@@ -135,7 +137,10 @@ public class SecondLifeService extends Service
         PeerConnectionParameters params = new PeerConnectionParameters(
                 true, false, displaySize.x, displaySize.y, 30, 1, MainActivity.VIDEO_CODEC_VP9, true, 1, MainActivity.AUDIO_CODEC_OPUS, true);
 
-        client = new WebRtcClient(this, this, configuration.ServerAddress, params, null);
+        //client = new WebRtcClient(this, this, configuration.ServerAddress, params, null);
+
+        rtcOrchestrator = new RTCOrchestrator(this, configuration.ServerAddress, params);
+        restartables.add(rtcOrchestrator);
 
         for(Restartable lifecycle: restartables){
             lifecycle.start();
@@ -143,10 +148,11 @@ public class SecondLifeService extends Service
     }
 
     private void uninit() {
+        /*
         if(client != null) {
             client.onDestroy();
-        }
-        Collections.reverse(restartables);//stop in reverse order
+        }*/
+        Collections.reverse(restartables);//turnOff in reverse order
         for(Restartable lifecycle: restartables){
             lifecycle.stop();
         }
@@ -166,7 +172,7 @@ public class SecondLifeService extends Service
     }
 
     public void answer(String callerId) throws JSONException {
-        client.sendMessage(callerId, "init", null);
+        //client.sendMessage(callerId, "init", null);
         startCam();
     }
 
@@ -176,10 +182,10 @@ public class SecondLifeService extends Service
 
     public void startCam() {
         // Camera settings
-        client.start(getDeviceName());
+        //client.start(getDeviceName());
     }
 
-    public String getDeviceName() {
+    public static String getDeviceName() {
         String manufacturer = Build.MANUFACTURER;
         String model = Build.MODEL;
         if (model.startsWith(manufacturer)) {
@@ -190,7 +196,7 @@ public class SecondLifeService extends Service
     }
 
 
-    private String capitalize(String s) {
+    private static String capitalize(String s) {
         if (s == null || s.length() == 0) {
             return "";
         }

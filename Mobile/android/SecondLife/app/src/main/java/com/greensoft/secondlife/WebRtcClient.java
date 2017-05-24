@@ -459,7 +459,7 @@ public class WebRtcClient {
         mListener.onLocalStream(localMS);
     }
 
-    private VideoCapturer getVideoCapturer() {
+    public static VideoCapturer getVideoCapturer() {
         String frontCameraDeviceName = getNameOfFrontFacingDevice();//VideoCapturerAndroid.getNameOfFrontFacingDevice();
         return VideoCapturerAndroid.create(frontCameraDeviceName);
     }
