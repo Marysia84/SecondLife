@@ -83,9 +83,13 @@ public class RTCConnector {
 
         AudioSource audioSource = factory.createAudioSource(new MediaConstraints());
         localMediaStream.addTrack(factory.createAudioTrack("ARDAMSa0", audioSource));
+
+        videoSource.restart();
     }
 
     private void doTurnOff() {
+
+        videoSource.dispose();
         factory.dispose();
     }
 

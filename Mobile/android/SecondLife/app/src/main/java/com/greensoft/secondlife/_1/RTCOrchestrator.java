@@ -247,17 +247,17 @@ public class RTCOrchestrator implements Restartable {
 
                 @Override
                 public void onSetSuccess() {
-
+                    Logger.d(TAG,"SdpObserverFactory.onSetSuccess");
                 }
 
                 @Override
                 public void onCreateFailure(String s) {
-
+                    Logger.d(TAG,"SdpObserverFactory.onCreateFailure:"+s);
                 }
 
                 @Override
                 public void onSetFailure(String s) {
-
+                    Logger.d(TAG,"SdpObserverFactory.onSetFailure:"+s);
                 }
             };
         }
@@ -272,7 +272,7 @@ public class RTCOrchestrator implements Restartable {
 
                 @Override
                 public void onSignalingChange(PeerConnection.SignalingState signalingState) {
-
+                    Logger.d(TAG,"PeerConnectionObserverFactory.onSignalingChange:"+signalingState);
                 }
 
                 @Override
@@ -289,12 +289,12 @@ public class RTCOrchestrator implements Restartable {
 
                 @Override
                 public void onIceConnectionReceivingChange(boolean b) {
-
+                    Logger.d(TAG,"PeerConnectionObserverFactory.onIceConnectionReceivingChange:"+b);
                 }
 
                 @Override
                 public void onIceGatheringChange(PeerConnection.IceGatheringState iceGatheringState) {
-                    Logger.d(TAG,"Peer.onIceGatheringChange: "+iceGatheringState);
+                    Logger.d(TAG,"PeerConnectionObserverFactory.onIceGatheringChange: "+iceGatheringState);
                 }
 
                 @Override
@@ -315,7 +315,7 @@ public class RTCOrchestrator implements Restartable {
                 @Override
                 public void onAddStream(MediaStream mediaStream) {
 
-                    //Logger.d(TAG,"onAddStream "+mediaStream.label());
+                    Logger.d(TAG,"onAddStream "+mediaStream.label());
                     // remote streams are displayed from 1 to MAX_PEER (0 is localStream)
                     //mListener.onAddRemoteStream(mediaStream, endPoint+1);
                 }
