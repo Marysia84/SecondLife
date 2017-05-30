@@ -9,7 +9,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <service android:name=".SecondLifeService" />
+        <service
+            android:name=".SecondLifeService"
+            android:process=":second_life_service" >
+        </service>
 
         <activity
             android:name=".ClockActivity"

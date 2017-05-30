@@ -54,10 +54,10 @@ var PeerManager = (function () {
           break;
       }
     };
-    peerDatabase[remoteId] = peer;
-        
+    peerDatabase[remoteId] = peer;      
     return peer;
   }
+
   function answer(remoteId) {
     var pc = peerDatabase[remoteId].pc;
     pc.createAnswer(
@@ -106,6 +106,9 @@ var PeerManager = (function () {
           }), function(){}, error);
         }
         break;
+      case 'videoStreamRestarted':
+        //offer(from);
+      break;
     }
   }
   function send(type, to, payload) {

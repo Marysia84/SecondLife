@@ -4,15 +4,16 @@ module.exports = function(io, streams) {
     console.log('-- ' + client.id + ' joined --');
     client.emit('id', client.id);
 
+    //redirect message: cam to browser, browser to cam
     client.on('message', function (details) {
       var otherClient = io.sockets.connected[details.to];
 
       if (!otherClient) {
         return;
       }
-        delete details.to;
-        details.from = client.id;
-        otherClient.emit('message', details);
+      delete details.to;
+      details.from = client.id;
+      otherClient.emit('message', details);
     });
 
     client.on('fetch_clients', function (details) {

@@ -15,17 +15,14 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import org.json.JSONException;
-import org.webrtc.EglBase;
 import org.webrtc.MediaStream;
 import org.webrtc.RendererCommon;
 import org.webrtc.VideoRenderer;
 import org.webrtc.VideoRendererGui;
 
-import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity implements WebRtcClient.RtcListener{
+public class MainActivity extends AppCompatActivity implements RTCEventListener {
 
 
     public static final String VIDEO_CODEC_VP9 = "VP9";

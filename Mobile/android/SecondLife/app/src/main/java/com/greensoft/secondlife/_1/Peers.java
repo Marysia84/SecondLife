@@ -1,6 +1,9 @@
 package com.greensoft.secondlife._1;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,8 +30,20 @@ public class Peers {
     public Peer remove(PeerId peerId) throws PeerNotExistsExeption {
 
         Peer peer = getPeer(peerId);
+        peer.closeConnection();
         peers.remove(peerId);
         return peer;
+    }
+
+    public List<Peer> removeAll() {
+
+        List<Peer> listOfPeers = new LinkedList<>();
+        for(Peer peer: peers.values()){
+            peer.closeConnection();
+            listOfPeers.add(peer);
+        }
+        peers.clear();
+        return listOfPeers;
     }
 
     public boolean isEmpty() {

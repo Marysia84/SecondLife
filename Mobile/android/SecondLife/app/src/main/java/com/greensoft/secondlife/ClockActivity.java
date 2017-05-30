@@ -1,6 +1,8 @@
 package com.greensoft.secondlife;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -8,6 +10,7 @@ import android.content.ServiceConnection;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Messenger;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +25,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import org.json.JSONException;
+
+import java.util.Calendar;
 
 import static com.greensoft.secondlife.MainActivity.CONFIGURATION_REQUEST;
 
@@ -126,7 +131,21 @@ public class ClockActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, SecondLifeService.class);
         startService(intent);
-        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        //bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        makeSureServiceIsAlive();
+    }
+
+    private void makeSureServiceIsAlive() {
+
+        Calendar cal = Calendar.getInstance();
+        Intent intent = new Intent(this, SecondLifeService.class);
+        PendingIntent pintent = PendingIntent
+                .getService(this, 0, intent, 0);
+
+        AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        // Start service every 20 seconds
+        alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
+                10* 1000, pintent);
     }
 
     @Override

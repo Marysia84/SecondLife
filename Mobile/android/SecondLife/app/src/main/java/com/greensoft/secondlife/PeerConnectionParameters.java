@@ -6,6 +6,8 @@ package com.greensoft.secondlife;
 
 public class PeerConnectionParameters {
 
+    public String Host;
+
     public final boolean videoCallEnabled;
     public final boolean loopback;
     public final int videoWidth;

@@ -14,6 +14,7 @@ import org.webrtc.SdpObserver;
 import org.webrtc.VideoSource;
 
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by zebul on 5/16/17.
@@ -23,15 +24,17 @@ public class RTCConnectionBuilder {
 
     private static boolean GLOBALS_INITIALIZED = false;
     private MediaConstraints mediaConstraints = new MediaConstraints();
-    private LinkedList<PeerConnection.IceServer> iceServers = new LinkedList<>();
+    private List<PeerConnection.IceServer> iceServers = new LinkedList<>();
+    private List<LocalMediaStreamAvailableListener> localMediaStreamAvailableListeners = new LinkedList<>();
 
     private PeerConnectionFactory factory;
     private MediaStream localMediaStream;
     private VideoSource videoSource;
+    private AudioSource audioSource;
     private PeerConnectionObserverFactory peerConnectionObserverFactory;
     private final SdpObserverFactory sdpObserverFactory;
     private PeerConnectionParameters pcParams;
-    private boolean turnedOn;
+    private boolean initailized;
 
     public RTCConnectionBuilder(Context appContext,
                                 PeerConnectionObserverFactory peerConnectionObserverFactory,
@@ -56,19 +59,26 @@ public class RTCConnectionBuilder {
         mediaConstraints.optional.add(new MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true"));
     }
 
-    public void turnOn(){
+    private void ensureInitailized(){
 
-        doTurnOn();
-        turnedOn = true;
+        if(initailized){
+            return;
+        }
+        setUp();
+        initailized = true;
     }
 
-    public void turnOff(){
+    public void dispose(){
 
-        doTurnOff();
-        turnedOn = false;
+        if(!initailized){
+            return;
+        }
+        tearDown();
+        initailized = false;
     }
 
-    private void doTurnOn() {
+    private void setUp() {
+
         factory = new PeerConnectionFactory();
 
         localMediaStream = factory.createLocalMediaStream("ARDAMS");
@@ -81,21 +91,53 @@ public class RTCConnectionBuilder {
         videoSource = factory.createVideoSource(WebRtcClient.getVideoCapturer(), videoConstraints);
         localMediaStream.addTrack(factory.createVideoTrack("ARDAMSv0", videoSource));
 
-        AudioSource audioSource = factory.createAudioSource(new MediaConstraints());
+        audioSource = factory.createAudioSource(new MediaConstraints());
         localMediaStream.addTrack(factory.createAudioTrack("ARDAMSa0", audioSource));
+
+        notifyLocalStreamAvailableListener();
 
         videoSource.restart();
     }
 
-    private void doTurnOff() {
+    public void attachLocalStreamAvailableListener(
+            LocalMediaStreamAvailableListener localMediaStreamAvailableListener){
+        localMediaStreamAvailableListeners.add(localMediaStreamAvailableListener);
+    }
 
-        videoSource.dispose();
+    private void notifyLocalStreamAvailableListener() {
+
+        for(LocalMediaStreamAvailableListener localMediaStreamAvailableListener:
+                localMediaStreamAvailableListeners){
+            localMediaStreamAvailableListener.onLocalMediaStreamAvailable(localMediaStream);
+        }
+    }
+
+    private void tearDown() {
+
+        try{
+
+            videoSource.stop();
+            videoSource.dispose();
+
+            //audioSource.dispose();
+            factory.dispose();
+
+        /*
         factory.dispose();
+        videoSource.stop();
+        videoSource.dispose();
+        */
+        }
+        catch(Exception exc_){
+
+            exc_.printStackTrace();
+        }
     }
 
     public RTCConnection buildRTCConnection(
             PeerId peerId) {
 
+        ensureInitailized();
         final PeerConnection.Observer peerConnectionObserver =
                 peerConnectionObserverFactory.createPeerConnectionObserver(peerId);
         final PeerConnection peerConnection = factory.createPeerConnection(
@@ -107,8 +149,7 @@ public class RTCConnectionBuilder {
         return rtcConnection;
     }
 
-
-    public boolean isTurnedOn() {
-        return turnedOn;
+    public boolean isInitailized() {
+        return initailized;
     }
 }

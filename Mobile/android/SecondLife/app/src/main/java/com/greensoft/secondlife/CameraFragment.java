@@ -1,17 +1,11 @@
 package com.greensoft.secondlife;
 
-import android.app.Activity;
-import android.content.Context;
-import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import com.greensoft.secondlife.R;
 
 import org.json.JSONException;
 import org.webrtc.MediaStream;
@@ -27,12 +21,12 @@ import static com.greensoft.secondlife.MainActivity.REMOTE_Y;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link DemoFragment.OnFragmentInteractionListener} interface
+ * {@link CameraFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link DemoFragment#newInstance} factory method to
+ * Use the {@link CameraFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class DemoFragment extends Fragment {
+public class CameraFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_REMOTE_PEER_ID = "REMOTE_PEER_ID";
@@ -45,13 +39,13 @@ public class DemoFragment extends Fragment {
     private GLSurfaceView vsv;
     private boolean visible = false;
 
-    public DemoFragment() {
+    public CameraFragment() {
         // Required empty public constructor
     }
 
     // TODO: Rename and change types and number of parameters
-    public static DemoFragment newInstance(String remotePeerId) {
-        DemoFragment fragment = new DemoFragment();
+    public static CameraFragment newInstance(String remotePeerId) {
+        CameraFragment fragment = new CameraFragment();
         Bundle args = new Bundle();
         args.putString(ARG_REMOTE_PEER_ID, remotePeerId);
         fragment.setArguments(args);
@@ -101,7 +95,7 @@ public class DemoFragment extends Fragment {
     public void start() {
 
         try {
-            final DemoActivity activity = (DemoActivity) getActivity();
+            final CameraViewActivity activity = (CameraViewActivity) getActivity();
             activity.requestRemoteStream(remotePeerId);
         } catch (JSONException e) {
             e.printStackTrace();

@@ -7,6 +7,7 @@ import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 import com.greensoft.log.Logger;
 import com.greensoft.secondlife.PeerConnectionParameters;
+import com.greensoft.secondlife.RTCEventListener;
 import com.greensoft.secondlife.Restartable;
 
 import org.json.JSONArray;
@@ -21,6 +22,8 @@ import org.webrtc.SessionDescription;
 
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import static com.greensoft.secondlife.SecondLifeService.getDeviceName;
@@ -29,21 +32,23 @@ import static com.greensoft.secondlife.SecondLifeService.getDeviceName;
  * Created by zebul on 5/22/17.
  */
 
-public class RTCOrchestrator implements Restartable {
+public class RTCOrchestrator implements Restartable, LocalMediaStreamAvailableListener {
 
     private static final String TAG = RTCOrchestrator.class.getSimpleName();
+    private List<RTCEventListener> rtcEventListeners = new LinkedList<>();
     private Socket client;
     private String host;
     private RTCController rtcController;
     private HashMap<String, Command> commandMap;
 
-    public RTCOrchestrator(Context context, String host, PeerConnectionParameters params){
+    public RTCOrchestrator(Context context, PeerConnectionParameters params){
 
         RTCConnectionBuilder rtcConnectionBuilder = new RTCConnectionBuilder(
                 context, peerConnectionObserverFactory, sdpObserverFactory, params);
+        rtcConnectionBuilder.attachLocalStreamAvailableListener(this);
 
         rtcController = new RTCController(rtcConnectionBuilder);
-        this.host = host;
+        this.host = params.Host;
         this.commandMap = new HashMap<>();
         commandMap.put("init", new CreateOfferCommand());
         commandMap.put("offer", new CreateAnswerCommand());
@@ -73,13 +78,17 @@ public class RTCOrchestrator implements Restartable {
         client.close();
     }
 
+    public void attachRTCEventListener(RTCEventListener rtcEventListener_){
+
+        rtcEventListeners.add(rtcEventListener_);
+    }
+
     private Emitter.Listener onId = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
             String id = (String) args[0];
-
             emitReadyToStream(getDeviceName());
-            //mListener.onCallReady(id);
+            notifyCallReady(id);
         }
     };
 
@@ -109,7 +118,7 @@ public class RTCOrchestrator implements Restartable {
                 Logger.e(TAG, e.getMessage());
             }
         }
-        //mListener.onClientsFetched(clients);
+        notifyClientsFetched(clients);
         }
     };
 
@@ -122,7 +131,7 @@ public class RTCOrchestrator implements Restartable {
                 String type = data.getString("type");
                 Logger.d(TAG,"onMessage from: "+from+", type: "+type);
                 JSONObject payload = null;
-                if(!type.equals("init")) {
+                if(!type.equals("init") && !type.equals("restartVideoStream")) {
                     try {
                         payload = data.getJSONObject("payload");
                     }
@@ -134,6 +143,7 @@ public class RTCOrchestrator implements Restartable {
                 PeerId peerId = new PeerId(from);
                 if(!rtcController.containsPeer(peerId)){
 
+                    notifyStatusChanged("CONNECTING");
                     rtcController.addPeer(peerId);
                 }
                 commandMap.get(type).execute(peerId, payload);
@@ -144,6 +154,17 @@ public class RTCOrchestrator implements Restartable {
             }
         }
     };
+
+    private void removePeer(PeerId peerId){
+
+        try {
+            rtcController.removePeer(peerId);
+            notifyStatusChanged("DISCONNECTED");
+            notifyRemoteStreamRemove(peerId);
+        } catch (Peers.PeerNotExistsExeption e) {
+            Logger.e(TAG,"removePeer: "+e.getMessage());
+        }
+    }
 
     private interface Command{
         void execute(PeerId peerId, JSONObject payload) throws JSONException, Peers.PeerNotExistsExeption;
@@ -196,7 +217,10 @@ public class RTCOrchestrator implements Restartable {
     private class RestartVideoStreamCommand implements Command {
         public void execute(PeerId peerId, JSONObject payload) throws JSONException, Peers.PeerNotExistsExeption {
 
-            rtcController.restart();
+            for(Peer peer: rtcController.restart()){
+
+                sendMessage(peer.getId(), "videoStreamRestarted", null);
+            }
         }
     }
 
@@ -212,7 +236,9 @@ public class RTCOrchestrator implements Restartable {
         JSONObject message = new JSONObject();
         message.put("to", peerId.getId());
         message.put("type", type);
-        message.put("payload", payload);
+        if(payload != null){
+            message.put("payload", payload);
+        }
         client.emit("message", message);
     }
 
@@ -282,7 +308,7 @@ public class RTCOrchestrator implements Restartable {
                             (iceConnectionState == PeerConnection.IceConnectionState.DISCONNECTED)||
                                     (iceConnectionState == PeerConnection.IceConnectionState.FAILED);
                     if(removePeer) {
-                        removePeer();
+                        removePeer(peerId);
                     }
                 }
 
@@ -316,14 +342,14 @@ public class RTCOrchestrator implements Restartable {
 
                     Logger.d(TAG,"onAddStream "+mediaStream.label());
                     // remote streams are displayed from 1 to MAX_PEER (0 is localStream)
-                    //mListener.onAddRemoteStream(mediaStream, endPoint+1);
+                    notifyRemoteStreamAdded(peerId, mediaStream);
                 }
 
                 @Override
                 public void onRemoveStream(MediaStream mediaStream) {
 
                     Logger.d(TAG, "onRemoveStream "+mediaStream.label());
-                    removePeer();
+                    removePeer(peerId);
                 }
 
                 @Override
@@ -337,17 +363,51 @@ public class RTCOrchestrator implements Restartable {
 
                     Logger.d(TAG,"Peer.onRenegotiationNeeded");
                 }
-
-                private void removePeer(){
-
-                    try {
-                        rtcController.removePeer(peerId);
-                    } catch (Peers.PeerNotExistsExeption e) {
-                        Logger.e(TAG,"removePeer: "+e.getMessage());
-                    }
-                }
             };
         }
     };
 
+    @Override
+    public void onLocalMediaStreamAvailable(MediaStream localMediaStream) {
+
+        notifyLocalStreamAvailable(localMediaStream);
+    }
+
+    private void notifyCallReady(String callId_) {
+        for(RTCEventListener rtcEventListener: rtcEventListeners){
+            rtcEventListener.onCallReady(callId_);
+        }
+    }
+
+    private void notifyStatusChanged(String status_) {
+        for(RTCEventListener rtcEventListener: rtcEventListeners){
+            rtcEventListener.onStatusChanged(status_);
+        }
+    }
+
+    private void notifyLocalStreamAvailable(MediaStream localStream) {
+        for(RTCEventListener rtcEventListener: rtcEventListeners){
+            rtcEventListener.onLocalStream(localStream);
+        }
+    }
+
+    private void notifyRemoteStreamAdded(PeerId peerId, MediaStream remoteMediaStream) {
+        for(RTCEventListener rtcEventListener: rtcEventListeners){
+            rtcEventListener.onAddRemoteStream(remoteMediaStream, 0);
+        }
+    }
+
+    private void notifyRemoteStreamRemove(PeerId peerId) {
+
+        for(RTCEventListener rtcEventListener: rtcEventListeners){
+            rtcEventListener.onRemoveRemoteStream(0);
+        }
+    }
+
+    private void notifyClientsFetched(Map<String, String> clients) {
+
+        for(RTCEventListener rtcEventListener: rtcEventListeners){
+            rtcEventListener.onClientsFetched(clients);
+        }
+    }
 }

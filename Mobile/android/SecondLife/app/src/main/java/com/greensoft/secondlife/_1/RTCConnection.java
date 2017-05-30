@@ -54,8 +54,10 @@ public class RTCConnection {
         }
     }
 
+    //TODO: temporary dispose commented out
     public void closeConnection() {
+
         peerConnection.close();
-        peerConnection.dispose();
+        //peerConnection.dispose();
     }
 }

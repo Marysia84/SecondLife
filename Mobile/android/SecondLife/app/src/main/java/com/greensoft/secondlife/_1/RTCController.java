@@ -1,7 +1,12 @@
 package com.greensoft.secondlife._1;
 
+import com.greensoft.secondlife.RTCEventListener;
+
 import org.webrtc.IceCandidate;
 import org.webrtc.SessionDescription;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by zebul on 5/16/17.
@@ -17,10 +22,11 @@ public class RTCController {
         this.rtcConnectionBuilder = rtcConnectionBuilder;
     }
 
-    public void restart(){
+    public List<Peer> restart(){
 
-        rtcConnectionBuilder.turnOff();
-        rtcConnectionBuilder.turnOn();
+        final List<Peer> peers = removeAllPeers();
+        rtcConnectionBuilder.dispose();
+        return peers;
     }
 
     public boolean containsPeer(PeerId peerId){
@@ -30,10 +36,6 @@ public class RTCController {
 
     public void addPeer(PeerId peerId){
 
-        if(!rtcConnectionBuilder.isTurnedOn()){
-            rtcConnectionBuilder.turnOn();
-        }
-
         Peer peer = createPeer(peerId);
         peers.add(peer);
     }
@@ -42,10 +44,17 @@ public class RTCController {
             throws Peers.PeerNotExistsExeption {
 
         Peer peer = peers.remove(peerId);
-        peer.closeConnection();
+        /*
         if(peers.isEmpty()){
-            rtcConnectionBuilder.turnOff();
-        }
+            rtcConnectionBuilder.dispose();
+        }*/
+    }
+
+    public List<Peer> removeAllPeers() {
+
+        List<Peer> listOfPeers = peers.removeAll();
+        //rtcConnectionBuilder.dispose();
+        return listOfPeers;
     }
 
     public void createOffer(PeerId peerId)

@@ -16,8 +16,7 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.hardware.Camera;
-import android.opengl.EGLContext;
-import android.util.Log;
+
 import org.webrtc.*;
 
 
@@ -36,10 +35,10 @@ public class WebRtcClient {
     private MediaConstraints pcConstraints = new MediaConstraints();
     private MediaStream localMS;
     private VideoSource videoSource;
-    private RtcListener mListener;
+    private RTCEventListener mListener;
     private Socket client;
 
-    public WebRtcClient(Context context, RtcListener listener, String host, PeerConnectionParameters params, EglBase.Context baseContext) {
+    public WebRtcClient(Context context, RTCEventListener listener, String host, PeerConnectionParameters params, EglBase.Context baseContext) {
         mListener = listener;
         pcParams = params;
         PeerConnectionFactory.initializeAndroidGlobals(context,/*listener, */true, true,
@@ -79,23 +78,6 @@ public class WebRtcClient {
         pcConstraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"));
         pcConstraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"));
         pcConstraints.optional.add(new MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true"));
-    }
-
-    /**
-     * Implement this interface to be notified of events.
-     */
-    public interface RtcListener{
-        void onCallReady(String callId);
-
-        void onStatusChanged(String newStatus);
-
-        void onLocalStream(MediaStream localStream);
-
-        void onAddRemoteStream(MediaStream remoteStream, int endPoint);
-
-        void onRemoveRemoteStream(int endPoint);
-
-        void onClientsFetched(Map<String, String> clients);
     }
 
     private interface Command{

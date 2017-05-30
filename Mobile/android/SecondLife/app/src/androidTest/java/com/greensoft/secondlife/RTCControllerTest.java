@@ -5,12 +5,14 @@ import android.graphics.Point;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.greensoft.secondlife._1.LocalMediaStreamAvailableListener;
 import com.greensoft.secondlife._1.PeerConnectionObserverFactory;
 import com.greensoft.secondlife._1.PeerId;
 import com.greensoft.secondlife._1.RTCConnectionBuilder;
 import com.greensoft.secondlife._1.RTCController;
 import com.greensoft.secondlife._1.SdpObserverFactory;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,7 +32,7 @@ import static org.junit.Assert.assertEquals;
  */
 
 @RunWith(AndroidJUnit4.class)
-public class RTCControllerTest {
+public class RTCControllerTest implements LocalMediaStreamAvailableListener {
 
     private RTCConnectionBuilder rtcConnectionBuilder;
     private RTCController rtcController;
@@ -50,18 +52,36 @@ public class RTCControllerTest {
 
         rtcConnectionBuilder =
                 new RTCConnectionBuilder(appContext, peerConnectionObserverFactory, sdpObserverFactory, params);
+        rtcConnectionBuilder.attachLocalStreamAvailableListener(this);
         rtcController = new RTCController(rtcConnectionBuilder);
     }
 
+    @After
+    public void tearDown() throws Exception {
+
+        //rtcController.removeAllPeers();
+    }
+
     @Test
-    public void when_peer_is_added_then_connector_is_turned_on() throws Exception {
+    public void when_peer_is_added_then_connector_is_initialized() throws Exception {
 
         //when
         final PeerId peerId = new PeerId("foo");
         rtcController.addPeer(peerId);
         //then
-        assertTrue(rtcConnectionBuilder.isTurnedOn());
+        assertTrue(rtcConnectionBuilder.isInitailized());
     }
+
+    @Test(timeout=30000)
+    public void when_peer_is_added_then_restart_does_not_block() throws Exception {
+
+        //when
+        final PeerId peerId = new PeerId("foo");
+        rtcController.addPeer(peerId);
+        //then
+        rtcController.restart();
+    }
+
 
     @Test
     public void when_all_peers_are_removed_then_connector_is_turned_off() throws Exception {
@@ -77,7 +97,7 @@ public class RTCControllerTest {
         }
 
         //then
-        assertFalse(rtcConnectionBuilder.isTurnedOn());
+        assertFalse(rtcConnectionBuilder.isInitailized());
     }
 
     SdpObserverFactory sdpObserverFactory = new SdpObserverFactory(){
@@ -119,49 +139,72 @@ public class RTCControllerTest {
                 @Override
                 public void onSignalingChange(PeerConnection.SignalingState signalingState) {
 
+                    int foo = 1;
+                    int bar = foo;
                 }
 
                 @Override
                 public void onIceConnectionChange(PeerConnection.IceConnectionState iceConnectionState) {
 
+                    int foo = 1;
+                    int bar = foo;
                 }
 
                 @Override
                 public void onIceConnectionReceivingChange(boolean b) {
 
+                    int foo = 1;
+                    int bar = foo;
                 }
 
                 @Override
                 public void onIceGatheringChange(PeerConnection.IceGatheringState iceGatheringState) {
 
+                    int foo = 1;
+                    int bar = foo;
                 }
 
                 @Override
                 public void onIceCandidate(IceCandidate iceCandidate) {
 
+                    int foo = 1;
+                    int bar = foo;
                 }
 
                 @Override
                 public void onAddStream(MediaStream mediaStream) {
 
+                    int foo = 1;
+                    int bar = foo;
                 }
 
                 @Override
                 public void onRemoveStream(MediaStream mediaStream) {
 
+                    int foo = 1;
+                    int bar = foo;
                 }
 
                 @Override
                 public void onDataChannel(DataChannel dataChannel) {
 
+                    int foo = 1;
+                    int bar = foo;
                 }
 
                 @Override
                 public void onRenegotiationNeeded() {
 
+                    int foo = 1;
+                    int bar = foo;
                 }
             };
         }
     };
 
+    @Override
+    public void onLocalMediaStreamAvailable(MediaStream localMediaStream) {
+
+
+    }
 }

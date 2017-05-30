@@ -7,7 +7,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.view.Window;
@@ -27,8 +26,8 @@ import static com.greensoft.secondlife.MainActivity.AUDIO_CODEC_OPUS;
 import static com.greensoft.secondlife.MainActivity.CONFIGURATION_REQUEST;
 import static com.greensoft.secondlife.MainActivity.VIDEO_CODEC_VP9;
 
-public class DemoActivity extends FragmentActivity
-        implements WebRtcClient.RtcListener{
+public class CameraViewActivity extends FragmentActivity
+        implements RTCEventListener {
 
     private RelativeLayout progressBarRelativeLayout;
     private RelativeLayout viewPagerRelativeLayout;
@@ -173,7 +172,7 @@ public class DemoActivity extends FragmentActivity
 
     class CameraPagerAdapter extends FragmentStatePagerAdapter implements ViewPager.OnPageChangeListener{
 
-        private List<DemoFragment> demoFragmentList = new LinkedList<>();
+        private List<CameraFragment> cameraFragmentList = new LinkedList<>();
 
         public CameraPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -181,24 +180,24 @@ public class DemoActivity extends FragmentActivity
 
         @Override
         public int getCount() {
-            return demoFragmentList.size();
+            return cameraFragmentList.size();
         }
 
         @Override
         public Fragment getItem(int position) {
-            return demoFragmentList.get(position);
+            return cameraFragmentList.get(position);
         }
 
 
         public void updateContent(Map<String, String> clients) {
 
-            demoFragmentList.clear();
+            cameraFragmentList.clear();
             //cameraViewPager.setCurrentItem(0);
             final Set<Map.Entry<String, String>> clientEntries = clients.entrySet();
             for(Map.Entry<String, String> clientEntry :clientEntries){
 
                 final String remotePeerId = clientEntry.getKey();
-                demoFragmentList.add(DemoFragment.newInstance(remotePeerId));
+                cameraFragmentList.add(CameraFragment.newInstance(remotePeerId));
             }
 
             notifyDataSetChanged();
@@ -207,8 +206,8 @@ public class DemoActivity extends FragmentActivity
         public void updateRemoteStream(MediaStream remoteStream) {
 
             final int currentItem = cameraViewPager.getCurrentItem();
-            final DemoFragment demoFragment = demoFragmentList.get(currentItem);
-            demoFragment.onRemoteStream(remoteStream);
+            final CameraFragment cameraFragment = cameraFragmentList.get(currentItem);
+            cameraFragment.onRemoteStream(remoteStream);
         }
 
         @Override
@@ -221,8 +220,8 @@ public class DemoActivity extends FragmentActivity
         @Override
         public void onPageSelected(int position) {
 
-            final DemoFragment demoFragment = demoFragmentList.get(position);
-            demoFragment.start();
+            final CameraFragment cameraFragment = cameraFragmentList.get(position);
+            cameraFragment.start();
 
         }
 

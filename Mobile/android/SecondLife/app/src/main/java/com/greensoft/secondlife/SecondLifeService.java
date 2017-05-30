@@ -11,7 +11,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.support.annotation.Nullable;
+import android.os.Messenger;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
@@ -34,7 +34,7 @@ import java.util.Map;
  */
 
 public class SecondLifeService extends Service
-        implements WebRtcClient.RtcListener{
+        implements RTCEventListener {
 
     private static final int EXECUTE_COMMAND = 1;
     private static final int SERVICE_NOTIFICATION_ID = 1;
@@ -52,16 +52,53 @@ public class SecondLifeService extends Service
         }
     }
 
+    /** Command to the service to display a message */
+    static final int MSG_SAY_HELLO = 1;
+
+    /**
+     * Handler of incoming messages from clients.
+     */
+    class IncomingHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_SAY_HELLO:
+                    Toast.makeText(getApplicationContext(), "hello!", Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    super.handleMessage(msg);
+            }
+        }
+    }
+
+    /**
+     * Target we publish for clients to send messages to IncomingHandler.
+     */
+    final Messenger mMessenger = new Messenger(new IncomingHandler());
+
+    /**
+     * When binding to the service, we return an interface to our messenger
+     * for sending messages to the service.
+     */
+    @Override
+    public IBinder onBind(Intent intent) {
+        Toast.makeText(getApplicationContext(), "binding", Toast.LENGTH_SHORT).show();
+        return mMessenger.getBinder();
+    }
+
+    /*
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return secondLifeServiceBinder;
     }
+    */
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         keepInForeground();
+        Toast.makeText(this, "SecondLifeService.onStartCommand", Toast.LENGTH_LONG).show();
         return START_STICKY;
     }
 
@@ -79,6 +116,11 @@ public class SecondLifeService extends Service
         init();
     }
 
+    @Override
+    public void onStart(Intent intent, int startId) {
+        super.onStart(intent, startId);
+        Toast.makeText(this, "SecondLifeService.onStart", Toast.LENGTH_LONG).show();
+    }
 
     @Override
     public void onDestroy() {
@@ -139,7 +181,9 @@ public class SecondLifeService extends Service
 
         //client = new WebRtcClient(this, this, configuration.ServerAddress, params, null);
 
-        rtcOrchestrator = new RTCOrchestrator(this, configuration.ServerAddress, params);
+        params.Host = configuration.ServerAddress;
+        rtcOrchestrator = new RTCOrchestrator(this, params);
+        rtcOrchestrator.attachRTCEventListener(this);
         restartables.add(rtcOrchestrator);
 
         for(Restartable lifecycle: restartables){
@@ -152,7 +196,7 @@ public class SecondLifeService extends Service
         if(client != null) {
             client.onDestroy();
         }*/
-        Collections.reverse(restartables);//turnOff in reverse order
+        Collections.reverse(restartables);//dispose in reverse order
         for(Restartable lifecycle: restartables){
             lifecycle.stop();
         }
