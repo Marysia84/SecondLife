@@ -373,7 +373,7 @@ public class WebRtcClient {
     }
 
     /**
-     * Call this method in Activity.onPause()
+     * Call this method in Activity.turnOffVideoSource()
      */
     public void onPause() {
         if(videoSource != null) videoSource.stop();

@@ -73,13 +73,13 @@ public class RTCControllerTest implements LocalMediaStreamAvailableListener {
     }
 
     @Test(timeout=30000)
-    public void when_peer_is_added_then_restart_does_not_block() throws Exception {
+    public void when_peer_is_added_then_dispose_does_not_block() throws Exception {
 
         //when
         final PeerId peerId = new PeerId("foo");
         rtcController.addPeer(peerId);
         //then
-        rtcController.restart();
+        rtcController.dispose();
     }
 
 

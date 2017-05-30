@@ -1,11 +1,8 @@
 package com.greensoft.secondlife._1;
 
-import com.greensoft.secondlife.RTCEventListener;
-
 import org.webrtc.IceCandidate;
 import org.webrtc.SessionDescription;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -22,7 +19,7 @@ public class RTCController {
         this.rtcConnectionBuilder = rtcConnectionBuilder;
     }
 
-    public List<Peer> restart(){
+    public List<Peer> dispose(){
 
         final List<Peer> peers = removeAllPeers();
         rtcConnectionBuilder.dispose();
@@ -96,5 +93,15 @@ public class RTCController {
         RTCConnection rtcConnection = rtcConnectionBuilder.buildRTCConnection(peerId);
         Peer peer = new Peer(peerId, rtcConnection);
         return peer;
+    }
+
+    public boolean turnOnVideoSource() {
+
+        return rtcConnectionBuilder.turnOnVideoSource();
+    }
+    
+    public boolean turnOffVideoSource() {
+
+        return rtcConnectionBuilder.turnOffVideoSource();
     }
 }

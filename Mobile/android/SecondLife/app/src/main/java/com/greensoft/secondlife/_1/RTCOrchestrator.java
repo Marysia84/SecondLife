@@ -74,6 +74,7 @@ public class RTCOrchestrator implements Restartable, LocalMediaStreamAvailableLi
     @Override
     public void stop(){
 
+        rtcController.dispose();
         client.disconnect();
         client.close();
     }
@@ -166,6 +167,16 @@ public class RTCOrchestrator implements Restartable, LocalMediaStreamAvailableLi
         }
     }
 
+    public boolean turnOnVideoSource() {
+
+        return rtcController.turnOnVideoSource();
+    }
+
+    public boolean turnOffVideoSource() {
+
+        return rtcController.turnOffVideoSource();
+    }
+
     private interface Command{
         void execute(PeerId peerId, JSONObject payload) throws JSONException, Peers.PeerNotExistsExeption;
     }
@@ -217,7 +228,7 @@ public class RTCOrchestrator implements Restartable, LocalMediaStreamAvailableLi
     private class RestartVideoStreamCommand implements Command {
         public void execute(PeerId peerId, JSONObject payload) throws JSONException, Peers.PeerNotExistsExeption {
 
-            for(Peer peer: rtcController.restart()){
+            for(Peer peer: rtcController.dispose()){
 
                 sendMessage(peer.getId(), "videoStreamRestarted", null);
             }

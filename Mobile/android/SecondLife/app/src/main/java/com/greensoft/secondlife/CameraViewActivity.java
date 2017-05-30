@@ -14,6 +14,8 @@ import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
+import com.greensoft.secondlife._1.RTCOrchestrator;
+
 import org.json.JSONException;
 import org.webrtc.MediaStream;
 
@@ -35,7 +37,7 @@ public class CameraViewActivity extends FragmentActivity
     private CameraPagerAdapter cameraPagerAdapter;
     private ImageButton openConfigurationImageButton;
 
-    private WebRtcClient client;
+    private RTCOrchestrator rtcOrchestrator = null;
     private String peerId;
 
     @Override
@@ -64,7 +66,7 @@ public class CameraViewActivity extends FragmentActivity
                 openSettingsActivity();
             }
         });
-        init();
+        setUpRTC();
     }
 
     private void openSettingsActivity() {
@@ -73,7 +75,7 @@ public class CameraViewActivity extends FragmentActivity
         startActivityForResult(i, CONFIGURATION_REQUEST);
     }
 
-    private void init() {
+    private void setUpRTC() {
 
         ConfigurationStore configurationStore = new ConfigurationStore(this);
         final Configuration configuration = configurationStore.load();
@@ -83,32 +85,36 @@ public class CameraViewActivity extends FragmentActivity
         PeerConnectionParameters params = new PeerConnectionParameters(
                 true, false, displaySize.x, displaySize.y, 30, 1, VIDEO_CODEC_VP9, true, 1, AUDIO_CODEC_OPUS, true);
 
-        client = new WebRtcClient(this, this, configuration.ServerAddress, params, null);
+        params.Host = configuration.ServerAddress;
+        rtcOrchestrator = new RTCOrchestrator(this, params);
+        rtcOrchestrator.attachRTCEventListener(this);
+        rtcOrchestrator.start();
+    }
+
+    @Override
+    public void onDestroy() {
+
+        tearDownRTC();
+        super.onDestroy();
+    }
+
+    private void tearDownRTC() {
+
+        rtcOrchestrator.stop();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if(client != null) {
-            client.onPause();
-        }
+        rtcOrchestrator.turnOffVideoSource();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if(client != null) {
-            client.onResume();
-        }
+        rtcOrchestrator.turnOnVideoSource();
     }
 
-    @Override
-    public void onDestroy() {
-        if(client != null) {
-            client.onDestroy();
-        }
-        super.onDestroy();
-    }
 
     @Override
     public void onCallReady(String peerId) {
@@ -167,7 +173,7 @@ public class CameraViewActivity extends FragmentActivity
     }
 
     public void requestRemoteStream(String remotePeerId) throws JSONException {
-        client.sendMessage(remotePeerId, "init", null);
+        client.sendMessage(remotePeerId, "setUpRTC", null);
     }
 
     class CameraPagerAdapter extends FragmentStatePagerAdapter implements ViewPager.OnPageChangeListener{

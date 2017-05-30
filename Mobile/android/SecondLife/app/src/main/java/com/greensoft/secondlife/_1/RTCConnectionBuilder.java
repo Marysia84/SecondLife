@@ -112,6 +112,24 @@ public class RTCConnectionBuilder {
         }
     }
 
+    public boolean turnOnVideoSource(){
+
+        if(!initailized){
+            return false;
+        }
+        videoSource.restart();
+        return true;
+    }
+
+    public boolean turnOffVideoSource(){
+
+        if(!initailized){
+            return false;
+        }
+        videoSource.stop();
+        return true;
+    }
+
     private void tearDown() {
 
         try{
