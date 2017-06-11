@@ -9,6 +9,7 @@ import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 import com.github.nkzawa.emitter.Emitter;
 import com.greensoft.log.Logger;
+import com.greensoft.secondlife._1.PeerId;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -237,7 +238,7 @@ public class WebRtcClient {
 
                     }
                 }
-                mListener.onClientsFetched(clients);
+                mListener.onPeersDownloaded(clients);
             }
         };
     }
@@ -256,7 +257,7 @@ public class WebRtcClient {
                 pc.addStream(localMS); //, new MediaConstraints()
             }
 
-            mListener.onStatusChanged("CONNECTING");
+            mListener.onPeerConnected(new PeerId(id));
         }
 
         @Override
@@ -296,7 +297,7 @@ public class WebRtcClient {
                     (iceConnectionState == PeerConnection.IceConnectionState.FAILED);
             if(removePeer) {
                 removePeer(id);
-                mListener.onStatusChanged("DISCONNECTED");
+                mListener.onPeerDisconnected(new PeerId(id));
             }
         }
 
@@ -425,16 +426,14 @@ public class WebRtcClient {
 
     private void setCamera(){
         localMS = factory.createLocalMediaStream("ARDAMS");
-        if(pcParams.videoCallEnabled){
-            MediaConstraints videoConstraints = new MediaConstraints();
-            videoConstraints.mandatory.add(new MediaConstraints.KeyValuePair("maxHeight", Integer.toString(pcParams.videoHeight)));
-            videoConstraints.mandatory.add(new MediaConstraints.KeyValuePair("maxWidth", Integer.toString(pcParams.videoWidth)));
-            videoConstraints.mandatory.add(new MediaConstraints.KeyValuePair("maxFrameRate", Integer.toString(pcParams.videoFps)));
-            videoConstraints.mandatory.add(new MediaConstraints.KeyValuePair("minFrameRate", Integer.toString(pcParams.videoFps)));
+        MediaConstraints videoConstraints = new MediaConstraints();
+        videoConstraints.mandatory.add(new MediaConstraints.KeyValuePair("maxHeight", Integer.toString(pcParams.videoHeight)));
+        videoConstraints.mandatory.add(new MediaConstraints.KeyValuePair("maxWidth", Integer.toString(pcParams.videoWidth)));
+        videoConstraints.mandatory.add(new MediaConstraints.KeyValuePair("maxFrameRate", Integer.toString(pcParams.videoFps)));
+        videoConstraints.mandatory.add(new MediaConstraints.KeyValuePair("minFrameRate", Integer.toString(pcParams.videoFps)));
 
-            videoSource = factory.createVideoSource(getVideoCapturer(), videoConstraints);
-            localMS.addTrack(factory.createVideoTrack("ARDAMSv0", videoSource));
-        }
+        videoSource = factory.createVideoSource(getVideoCapturer(), videoConstraints);
+        localMS.addTrack(factory.createVideoTrack("ARDAMSv0", videoSource));
 
         AudioSource audioSource = factory.createAudioSource(new MediaConstraints());
         localMS.addTrack(factory.createAudioTrack("ARDAMSa0", audioSource));

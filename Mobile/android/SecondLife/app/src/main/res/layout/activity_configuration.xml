@@ -38,6 +38,13 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"/>
         </LinearLayout>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/manageClockVisiblityCheckBox"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="Wyłącz widoczność zegara w nocy"/>
+
     </LinearLayout>
     <Button
         android:id="@+id/saveConfigurationButton"

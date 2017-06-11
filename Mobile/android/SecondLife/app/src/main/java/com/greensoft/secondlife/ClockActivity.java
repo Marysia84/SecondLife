@@ -1,6 +1,5 @@
 package com.greensoft.secondlife;
 
-import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -8,24 +7,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
-import android.os.Messenger;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.DigitalClock;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import org.json.JSONException;
-
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import static com.greensoft.secondlife.MainActivity.CONFIGURATION_REQUEST;
@@ -34,8 +29,13 @@ public class ClockActivity extends AppCompatActivity {
 
     private boolean serviceBound = false;
     private SecondLifeService secondLifeService;
-    private DigitalClock digitalClock;
+    private TextView digitalClock;
     private ImageButton openConfigurationImageButton;
+
+    private Handler handler;
+    private Runnable ticker;
+    private int previousMinute = -1;
+    private Configuration configuration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +48,9 @@ public class ClockActivity extends AppCompatActivity {
                         | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                         | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
         setContentView(R.layout.activity_clock);
-        digitalClock = (DigitalClock)findViewById(R.id.digitalClock);
+        digitalClock = (TextView)findViewById(R.id.digitalClock);
+        Typeface tf = Typeface.createFromAsset(getAssets(),"fonts/digital-7.ttf");
+        digitalClock.setTypeface(tf);
         openConfigurationImageButton = (ImageButton)findViewById(R.id.openConfigurationImageButton);
         openConfigurationImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -57,71 +59,182 @@ public class ClockActivity extends AppCompatActivity {
                 openSettingsActivity();
             }
         });
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        digitalClock.addTextChangedListener(textAutoResizeWatcher(digitalClock, 98, 256));
+        //updateFontSize(100);
+        configuration = new ConfigurationStore(this).load();
+        if(!configuration.ManageClockVisiblity){
+            digitalClock.setVisibility(View.VISIBLE);
+        }
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                startTickPerSecond();
+            }
+        }, 500);
     }
 
-    private TextWatcher textAutoResizeWatcher(final TextView view, final int MIN_SP, final int MAX_SP){
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopTickPerSecond();
+    }
 
-        return new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-                final int widthLimitPixels = view.getWidth() - view.getPaddingRight() - view.getPaddingLeft();
-                Paint paint = new Paint();
-                float fontSizeSP = pixelsToSp(view.getTextSize());
-                paint.setTextSize(spToPixels(fontSizeSP));
-
-                String viewText = view.getText().toString();
-
-                float widthPixels = paint.measureText(viewText);
-
-                // Increase font size if necessary.
-                if (widthPixels < widthLimitPixels){
-                    while (widthPixels < widthLimitPixels && fontSizeSP <= MAX_SP){
-                        ++fontSizeSP;
-                        paint.setTextSize(spToPixels(fontSizeSP));
-                        widthPixels = paint.measureText(viewText);
-                    }
-                    --fontSizeSP;
-                }
-                // Decrease font size if necessary.
-                else {
-                    while (widthPixels > widthLimitPixels || fontSizeSP > MAX_SP) {
-                        if (fontSizeSP < MIN_SP) {
-                            fontSizeSP = MIN_SP;
-                            break;
-                        }
-                        --fontSizeSP;
-                        paint.setTextSize(spToPixels(fontSizeSP));
-                        widthPixels = paint.measureText(viewText);
-                    }
-                }
-
-                view.setTextSize(fontSizeSP);
+    private void startTickPerSecond()
+    {
+        handler=new Handler();
+        ticker = new Runnable()
+        {
+            public void run()
+            {
+                updateClock();
+                long now = SystemClock.uptimeMillis();
+                long next = now + (1000 - now % 1000);
+                handler.postAtTime(ticker, next);
             }
         };
+        ticker.run();
     }
 
-    private float pixelsToSp(float px) {
-        float scaledDensity = getResources().getDisplayMetrics().scaledDensity;
+    private void stopTickPerSecond() {
+
+        if(handler!=null)
+        {
+            handler.removeCallbacks(ticker);
+        }
+    }
+
+    private void updateClock() {
+
+        Calendar calendar = Calendar.getInstance();
+        int currentMinute = calendar.get(Calendar.MINUTE);
+
+        boolean minuteChanged = currentMinute != previousMinute;
+        previousMinute = currentMinute;
+        boolean hmOnly = true;
+        SimpleDateFormat timeFormatter = new SimpleDateFormat(hmOnly ? "HH:mm" : "HH:mm:ss");
+        if(minuteChanged){
+
+            if(configuration.ManageClockVisiblity){
+
+                final int hourOfDay = calendar.get(Calendar.HOUR_OF_DAY);
+                if(6<= hourOfDay && hourOfDay <22){
+                    ensureClockVisible();
+                }
+                else{
+                    ensureClockInvisible();
+                }
+            }
+
+            int seconds = calendar.get(Calendar.SECOND);
+            calendar.set(Calendar.SECOND, 0);
+            //get rid of this shit
+            final String textToUpdateFontSize = timeFormatter.format(calendar.getTime());
+            updateMaxFontSize(digitalClock, "55:55");
+            calendar.set(Calendar.SECOND, seconds);
+        }
+
+        final String currentTime = timeFormatter.format(calendar.getTime());
+        if(hmOnly){
+            if(minuteChanged){
+                digitalClock.setText(currentTime);
+            }
+        }
+        else{
+
+            digitalClock.setText(currentTime);
+        }
+    }
+
+    private void ensureClockVisible() {
+
+        if(digitalClock.getVisibility() != View.VISIBLE){
+            digitalClock.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void ensureClockInvisible() {
+
+        if(digitalClock.getVisibility() != View.INVISIBLE){
+            digitalClock.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    protected char findBiggestDigit(){
+
+        return 'a';
+    }
+
+    protected static void updateMaxFontSize(TextView view, String viewText){
+
+        final int maxWidthPixels = view.getWidth() - view.getPaddingRight() - view.getPaddingLeft();
+        final int maxHeightPixels = view.getHeight() - view.getPaddingTop() - view.getPaddingBottom();
+
+        Paint paint = new Paint();
+        paint.setTypeface(view.getTypeface());
+
+        float fontSizeSP = pixelsToSp(view.getContext(), view.getTextSize());
+        paint.setTextSize(spToPixels(view.getContext(), fontSizeSP));
+
+        Rect bounds = new Rect();
+        paint.getTextBounds(viewText, 0, viewText.length(), bounds);
+        int width = bounds.width();
+        int height = bounds.height();
+
+        //float widthPixels = paint.measureText(viewText);
+
+        while((width<maxWidthPixels) && (height<maxHeightPixels)){
+            paint.setTextSize(spToPixels(view.getContext(), ++fontSizeSP));
+            paint.getTextBounds(viewText, 0, viewText.length(), bounds);
+            width = bounds.width();
+            height = bounds.height();
+        }
+
+        while((width>=maxWidthPixels) || (height>=maxHeightPixels)){
+            paint.setTextSize(spToPixels(view.getContext(), --fontSizeSP));
+            paint.getTextBounds(viewText, 0, viewText.length(), bounds);
+            width = bounds.width();
+            height = bounds.height();
+        }
+
+        view.setTextSize(--fontSizeSP);
+
+        /*
+        // Increase font size if necessary.
+        if (widthPixels < maxWidthPixels){
+            while (widthPixels < maxWidthPixels){
+                ++fontSizeSP;
+                paint.setTextSize(spToPixels(view.getContext(), fontSizeSP));
+                widthPixels = paint.measureText(viewText);
+            }
+            --fontSizeSP;
+        }
+        // Decrease font size if necessary.
+        else {
+            while (widthPixels > maxWidthPixels) {
+                --fontSizeSP;
+                paint.setTextSize(spToPixels(view.getContext(),fontSizeSP));
+                widthPixels = paint.measureText(viewText);
+            }
+        }
+        */
+        //paint.getTextBounds();
+
+
+
+        //view.setTextSize(fontSizeSP);
+    }
+
+    private static float pixelsToSp(Context context, float px) {
+        float scaledDensity = context.getResources().getDisplayMetrics().scaledDensity;
         return px/scaledDensity;
     }
 
-    private float spToPixels(float sp) {
-        float scaledDensity = getResources().getDisplayMetrics().scaledDensity;
+    private static float spToPixels(Context context, float sp) {
+        float scaledDensity = context.getResources().getDisplayMetrics().scaledDensity;
         return sp * scaledDensity;
     }
 

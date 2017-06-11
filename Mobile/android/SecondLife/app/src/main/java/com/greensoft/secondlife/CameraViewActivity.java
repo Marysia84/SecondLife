@@ -13,7 +13,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
+import com.greensoft.secondlife._1.PeerId;
 import com.greensoft.secondlife._1.RTCOrchestrator;
 
 import org.json.JSONException;
@@ -83,12 +85,22 @@ public class CameraViewActivity extends FragmentActivity
         Point displaySize = new Point();
         getWindowManager().getDefaultDisplay().getSize(displaySize);
         PeerConnectionParameters params = new PeerConnectionParameters(
-                true, false, displaySize.x, displaySize.y, 30, 1, VIDEO_CODEC_VP9, true, 1, AUDIO_CODEC_OPUS, true);
+                displaySize.x, displaySize.y, 30, 1, VIDEO_CODEC_VP9, true, 1, AUDIO_CODEC_OPUS, true);
 
         params.Host = configuration.ServerAddress;
         rtcOrchestrator = new RTCOrchestrator(this, params);
         rtcOrchestrator.attachRTCEventListener(this);
         rtcOrchestrator.start();
+    }
+
+    private void showTextMessageAsToast(final String textMessage){
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(CameraViewActivity.this, textMessage, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override
@@ -104,61 +116,71 @@ public class CameraViewActivity extends FragmentActivity
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        rtcOrchestrator.turnOnVideoSource();
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
         rtcOrchestrator.turnOffVideoSource();
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        rtcOrchestrator.turnOnVideoSource();
-    }
-
-
-    @Override
     public void onCallReady(String peerId) {
 
         this.peerId = peerId;
         try {
-            client.fetchClients();
+            rtcOrchestrator.downloadPeers();
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public void onStatusChanged(String newStatus) {
+    public void onPeerConnected(PeerId peerId) {
 
+        showTextMessageAsToast("onPeerConnected: "+peerId.getId());
+    }
+
+    @Override
+    public void onPeerDisconnected(PeerId peerId) {
+
+        showTextMessageAsToast("onPeerDisconnected: "+peerId.getId());
     }
 
     @Override
     public void onLocalStream(MediaStream localStream) {
 
+        showTextMessageAsToast("onLocalStream");
     }
 
     @Override
-    public void onAddRemoteStream(MediaStream remoteStream, int endPoint) {
+    public void onAddRemoteStream(MediaStream remoteMediaStream, int endPoint) {
 
-        cameraPagerAdapter.updateRemoteStream(remoteStream);
+        showTextMessageAsToast("onAddRemoteStream");
+        cameraPagerAdapter.updateRemoteStream(remoteMediaStream);
     }
 
     @Override
     public void onRemoveRemoteStream(int endPoint) {
 
+        showTextMessageAsToast("onRemoveRemoteStream");
     }
 
     @Override
-    public void onClientsFetched(final Map<String, String> clients) {
+    public void onPeersDownloaded(final Map<String, String> peers) {
 
+        showTextMessageAsToast("onPeersDownloaded");
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
 
-                final int size = clients.size();
+                final int size = peers.size();
                 if(size > 0){
 
-                    cameraPagerAdapter.updateContent(clients);
+                    cameraPagerAdapter.updateContent(peers);
                     progressBarRelativeLayout.setVisibility(View.GONE);
                     viewPagerRelativeLayout.setVisibility(View.VISIBLE);
                 }
@@ -172,8 +194,8 @@ public class CameraViewActivity extends FragmentActivity
 
     }
 
-    public void requestRemoteStream(String remotePeerId) throws JSONException {
-        client.sendMessage(remotePeerId, "setUpRTC", null);
+    public void requestRemoteStream(PeerId remotePeerId) throws JSONException {
+        rtcOrchestrator.sendMessageToRemotePeer(remotePeerId, "init", null);
     }
 
     class CameraPagerAdapter extends FragmentStatePagerAdapter implements ViewPager.OnPageChangeListener{

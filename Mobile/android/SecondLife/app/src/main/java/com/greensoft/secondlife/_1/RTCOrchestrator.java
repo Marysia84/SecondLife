@@ -66,7 +66,7 @@ public class RTCOrchestrator implements Restartable, LocalMediaStreamAvailableLi
             e.printStackTrace();
         }
         client.on("id", onId);
-        client.on("message", onMessage);
+        client.on("message", onMessageFromRemotePeer);
         client.on("fetch_clients", onFetchClients);
         client.connect();
     }
@@ -123,14 +123,14 @@ public class RTCOrchestrator implements Restartable, LocalMediaStreamAvailableLi
         }
     };
 
-    private Emitter.Listener onMessage = new Emitter.Listener() {
+    private Emitter.Listener onMessageFromRemotePeer = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
             JSONObject data = (JSONObject) args[0];
             try {
                 String from = data.getString("from");
                 String type = data.getString("type");
-                Logger.d(TAG,"onMessage from: "+from+", type: "+type);
+                Logger.d(TAG,"onMessageFromRemotePeer from: "+from+", type: "+type);
                 JSONObject payload = null;
                 if(!type.equals("init") && !type.equals("restartVideoStream")) {
                     try {
@@ -144,8 +144,8 @@ public class RTCOrchestrator implements Restartable, LocalMediaStreamAvailableLi
                 PeerId peerId = new PeerId(from);
                 if(!rtcController.containsPeer(peerId)){
 
-                    notifyStatusChanged("CONNECTING");
                     rtcController.addPeer(peerId);
+                    notifyPeerConnected(peerId);
                 }
                 commandMap.get(type).execute(peerId, payload);
             } catch (JSONException e) {
@@ -160,7 +160,7 @@ public class RTCOrchestrator implements Restartable, LocalMediaStreamAvailableLi
 
         try {
             rtcController.removePeer(peerId);
-            notifyStatusChanged("DISCONNECTED");
+            notifyPeerDisconnected(peerId);
             notifyRemoteStreamRemove(peerId);
         } catch (Peers.PeerNotExistsExeption e) {
             Logger.e(TAG,"removePeer: "+e.getMessage());
@@ -230,7 +230,7 @@ public class RTCOrchestrator implements Restartable, LocalMediaStreamAvailableLi
 
             for(Peer peer: rtcController.dispose()){
 
-                sendMessage(peer.getId(), "videoStreamRestarted", null);
+                sendMessageToRemotePeer(peer.getId(), "videoStreamRestarted", null);
             }
         }
     }
@@ -243,9 +243,9 @@ public class RTCOrchestrator implements Restartable, LocalMediaStreamAvailableLi
      * @param payload payload of message
      * @throws JSONException
      */
-    public void sendMessage(PeerId peerId, String type, JSONObject payload) throws JSONException {
+    public void sendMessageToRemotePeer(PeerId remotePeerId, String type, JSONObject payload) throws JSONException {
         JSONObject message = new JSONObject();
-        message.put("to", peerId.getId());
+        message.put("to", remotePeerId.getId());
         message.put("type", type);
         if(payload != null){
             message.put("payload", payload);
@@ -253,7 +253,7 @@ public class RTCOrchestrator implements Restartable, LocalMediaStreamAvailableLi
         client.emit("message", message);
     }
 
-    public void fetchClients() throws JSONException {
+    public void downloadPeers() throws JSONException {
         JSONObject message = new JSONObject();
         client.emit("fetch_clients", message);
     }
@@ -271,7 +271,7 @@ public class RTCOrchestrator implements Restartable, LocalMediaStreamAvailableLi
                         JSONObject payload = new JSONObject();
                         payload.put("type", sdp.type.canonicalForm());
                         payload.put("sdp", sdp.description);
-                        sendMessage(peerId, sdp.type.canonicalForm(), payload);
+                        sendMessageToRemotePeer(peerId, sdp.type.canonicalForm(), payload);
                         rtcController.setLocalDescription(peerId, sdp);
                         Logger.d(TAG,"Peer.onCreateSuccess");
                     } catch (JSONException e) {
@@ -341,7 +341,7 @@ public class RTCOrchestrator implements Restartable, LocalMediaStreamAvailableLi
                         payload.put("label", iceCandidate.sdpMLineIndex);
                         payload.put("id", iceCandidate.sdpMid);
                         payload.put("candidate", iceCandidate.sdp);
-                        sendMessage(peerId, "candidate", payload);
+                        sendMessageToRemotePeer(peerId, "candidate", payload);
                         Logger.d(TAG,"onIceCandidate: "+iceCandidate);
                     } catch (JSONException e) {
                         Logger.e(TAG,"onIceCandidate: "+e.getMessage());
@@ -384,15 +384,21 @@ public class RTCOrchestrator implements Restartable, LocalMediaStreamAvailableLi
         notifyLocalStreamAvailable(localMediaStream);
     }
 
-    private void notifyCallReady(String callId_) {
+    private void notifyCallReady(String callId) {
         for(RTCEventListener rtcEventListener: rtcEventListeners){
-            rtcEventListener.onCallReady(callId_);
+            rtcEventListener.onCallReady(callId);
         }
     }
 
-    private void notifyStatusChanged(String status_) {
+    private void notifyPeerConnected(PeerId peerId) {
         for(RTCEventListener rtcEventListener: rtcEventListeners){
-            rtcEventListener.onStatusChanged(status_);
+            rtcEventListener.onPeerConnected(peerId);
+        }
+    }
+
+    private void notifyPeerDisconnected(PeerId peerId) {
+        for(RTCEventListener rtcEventListener: rtcEventListeners){
+            rtcEventListener.onPeerDisconnected(peerId);
         }
     }
 
@@ -402,7 +408,7 @@ public class RTCOrchestrator implements Restartable, LocalMediaStreamAvailableLi
         }
     }
 
-    private void notifyRemoteStreamAdded(PeerId peerId, MediaStream remoteMediaStream) {
+    private void notifyRemoteStreamAdded(PeerId localPeerId, MediaStream remoteMediaStream) {
         for(RTCEventListener rtcEventListener: rtcEventListeners){
             rtcEventListener.onAddRemoteStream(remoteMediaStream, 0);
         }
@@ -418,7 +424,7 @@ public class RTCOrchestrator implements Restartable, LocalMediaStreamAvailableLi
     private void notifyClientsFetched(Map<String, String> clients) {
 
         for(RTCEventListener rtcEventListener: rtcEventListeners){
-            rtcEventListener.onClientsFetched(clients);
+            rtcEventListener.onPeersDownloaded(clients);
         }
     }
 }

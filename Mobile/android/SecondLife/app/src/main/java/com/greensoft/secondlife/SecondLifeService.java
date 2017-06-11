@@ -6,6 +6,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
+import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -18,6 +19,7 @@ import android.widget.Toast;
 import com.greensoft.log.LogSubscriber;
 import com.greensoft.log.Logger;
 import com.greensoft.log.subscribers.http.HttpServerLogger;
+import com.greensoft.secondlife._1.PeerId;
 import com.greensoft.secondlife._1.RTCOrchestrator;
 
 import org.json.JSONException;
@@ -98,7 +100,7 @@ public class SecondLifeService extends Service
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         keepInForeground();
-        Toast.makeText(this, "SecondLifeService.onStartCommand", Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, "SecondLifeService.onStartCommand", Toast.LENGTH_LONG).show();
         return START_STICKY;
     }
 
@@ -119,7 +121,7 @@ public class SecondLifeService extends Service
     @Override
     public void onStart(Intent intent, int startId) {
         super.onStart(intent, startId);
-        Toast.makeText(this, "SecondLifeService.onStart", Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, "SecondLifeService.onStart", Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -177,7 +179,7 @@ public class SecondLifeService extends Service
         displaySize.y = 480;
         //getWindowManager().getDefaultDisplay().getSize(displaySize);
         PeerConnectionParameters params = new PeerConnectionParameters(
-                true, false, displaySize.x, displaySize.y, 30, 1, MainActivity.VIDEO_CODEC_VP9, true, 1, MainActivity.AUDIO_CODEC_OPUS, true);
+                displaySize.x, displaySize.y, 30, 1, MainActivity.VIDEO_CODEC_VP9, true, 1, MainActivity.AUDIO_CODEC_OPUS, true);
 
         //client = new WebRtcClient(this, this, configuration.ServerAddress, params, null);
 
@@ -189,6 +191,10 @@ public class SecondLifeService extends Service
         for(Restartable lifecycle: restartables){
             lifecycle.start();
         }
+
+        AudioManager mgr = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        final int streamMaxVolume = mgr.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        mgr.setStreamVolume(AudioManager.STREAM_MUSIC, streamMaxVolume, 0);
     }
 
     private void uninit() {
@@ -204,6 +210,8 @@ public class SecondLifeService extends Service
 
     @Override
     public void onCallReady(String callId) {
+
+        showTextMessageAsToast("onCallReady: "+callId);
         if (callerId != null) {
             try {
                 answer(callerId);
@@ -216,7 +224,7 @@ public class SecondLifeService extends Service
     }
 
     public void answer(String callerId) throws JSONException {
-        //client.sendMessage(callerId, "init", null);
+        //client.sendMessageToRemotePeer(callerId, "init", null);
         startCam();
     }
 
@@ -253,9 +261,24 @@ public class SecondLifeService extends Service
     }
 
     @Override
-    public void onStatusChanged(final String newStatus) {
+    public void onPeerConnected(PeerId remotePeerId) {
 
-        showTextMessageAsToast(newStatus);
+        Message message = handler.obtainMessage(EXECUTE_COMMAND);
+        message.obj = new InitConnectionCommand(remotePeerId);
+        message.sendToTarget();
+        showTextMessageAsToast("onPeerConnected:"+remotePeerId.getId());
+    }
+
+    @Override
+    public void onPeerDisconnected(PeerId remotePeerId) {
+
+        /*
+            try {
+                rtcOrchestrator.sendMessageToRemotePeer(remotePeerId, "init", null);
+            } catch (JSONException e) {
+                Logger.e(TAG, "onPeerConnected:"+e.getMessage());
+            }*/
+        showTextMessageAsToast("onPeerDisconnected");
     }
 
     @Override
@@ -266,7 +289,7 @@ public class SecondLifeService extends Service
     }
 
     @Override
-    public void onAddRemoteStream(MediaStream remoteStream, int endPoint) {
+    public void onAddRemoteStream(MediaStream remoteMediaStream, int endPoint) {
 
         showTextMessageAsToast("onAddRemoteStream");
         Logger.i(TAG, "onAddRemoteStream");
@@ -280,7 +303,7 @@ public class SecondLifeService extends Service
     }
 
     @Override
-    public void onClientsFetched(Map<String, String> clients) {
+    public void onPeersDownloaded(Map<String, String> clients) {
 
     }
 
@@ -301,6 +324,30 @@ public class SecondLifeService extends Service
     interface Command{
 
         void execute();
+    }
+
+    class InitConnectionCommand implements Command{
+
+        private PeerId remotePeerId;
+        InitConnectionCommand(PeerId remotePeerId){
+            this.remotePeerId = remotePeerId;
+        }
+        @Override
+        public void execute() {
+
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+
+                    try {
+                        rtcOrchestrator.sendMessageToRemotePeer(remotePeerId, "init", null);
+                    } catch (JSONException e) {
+                        Logger.e(TAG, "onPeerConnected:"+e.getMessage());
+                    }
+                }
+            }, 5000);
+        }
     }
 
     class ShowToastCommand implements Command{

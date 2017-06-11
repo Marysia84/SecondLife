@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.greensoft.secondlife._1.PeerId;
+
 import org.json.JSONException;
 import org.webrtc.MediaStream;
 import org.webrtc.RendererCommon;
@@ -96,7 +98,7 @@ public class CameraFragment extends Fragment {
 
         try {
             final CameraViewActivity activity = (CameraViewActivity) getActivity();
-            activity.requestRemoteStream(remotePeerId);
+            activity.requestRemoteStream(new PeerId(remotePeerId));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -107,10 +109,10 @@ public class CameraFragment extends Fragment {
         super.onDestroyView();
     }
 
-    public void onRemoteStream(MediaStream remoteStream) {
+    public void onRemoteStream(MediaStream remoteMediaStream) {
 
-        remoteStream.videoTracks.get(0).addRenderer(new VideoRenderer(remoteRender));
-        boolean mirror = true;
+        remoteMediaStream.videoTracks.get(0).addRenderer(new VideoRenderer(remoteRender));
+        boolean mirror = false;
         VideoRendererGui.update(remoteRender,
                 REMOTE_X, REMOTE_Y,
                 REMOTE_WIDTH, REMOTE_HEIGHT, scalingType, mirror);

@@ -6,12 +6,14 @@ import com.greensoft.secondlife.PeerConnectionParameters;
 import com.greensoft.secondlife.WebRtcClient;
 
 import org.webrtc.AudioSource;
+import org.webrtc.AudioTrack;
 import org.webrtc.MediaConstraints;
 import org.webrtc.MediaStream;
 import org.webrtc.PeerConnection;
 import org.webrtc.PeerConnectionFactory;
 import org.webrtc.SdpObserver;
 import org.webrtc.VideoSource;
+import org.webrtc.VideoTrack;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -89,10 +91,12 @@ public class RTCConnectionBuilder {
         videoConstraints.mandatory.add(new MediaConstraints.KeyValuePair("minFrameRate", Integer.toString(pcParams.videoFps)));
 
         videoSource = factory.createVideoSource(WebRtcClient.getVideoCapturer(), videoConstraints);
-        localMediaStream.addTrack(factory.createVideoTrack("ARDAMSv0", videoSource));
+        final VideoTrack videoTrack = factory.createVideoTrack("ARDAMSv0", videoSource);
+        localMediaStream.addTrack(videoTrack);
 
         audioSource = factory.createAudioSource(new MediaConstraints());
-        localMediaStream.addTrack(factory.createAudioTrack("ARDAMSa0", audioSource));
+        final AudioTrack audioTrack = factory.createAudioTrack("ARDAMSa0", audioSource);
+        localMediaStream.addTrack(audioTrack);
 
         notifyLocalStreamAvailableListener();
 

@@ -14,6 +14,8 @@ import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.greensoft.secondlife._1.PeerId;
+
 import org.json.JSONException;
 import org.webrtc.MediaStream;
 import org.webrtc.RendererCommon;
@@ -106,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements RTCEventListener 
         Point displaySize = new Point();
         getWindowManager().getDefaultDisplay().getSize(displaySize);
         PeerConnectionParameters params = new PeerConnectionParameters(
-                true, false, displaySize.x, displaySize.y, 30, 1, VIDEO_CODEC_VP9, true, 1, AUDIO_CODEC_OPUS, true);
+                displaySize.x, displaySize.y, 30, 1, VIDEO_CODEC_VP9, true, 1, AUDIO_CODEC_OPUS, true);
 
         client = new WebRtcClient(this, this, mSocketAddress, params, null);
     }
@@ -197,11 +199,21 @@ public class MainActivity extends AppCompatActivity implements RTCEventListener 
     }
 
     @Override
-    public void onStatusChanged(final String newStatus) {
+    public void onPeerConnected(PeerId peerId) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(getApplicationContext(), newStatus, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "CONNECTED", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    @Override
+    public void onPeerDisconnected(PeerId peerId) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), "DISCONNECTED", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -218,8 +230,8 @@ public class MainActivity extends AppCompatActivity implements RTCEventListener 
     }
 
     @Override
-    public void onAddRemoteStream(MediaStream remoteStream, int endPoint) {
-        remoteStream.videoTracks.get(0).addRenderer(new VideoRenderer(remoteRender));
+    public void onAddRemoteStream(MediaStream remoteMediaStream, int endPoint) {
+        remoteMediaStream.videoTracks.get(0).addRenderer(new VideoRenderer(remoteRender));
 
         boolean mirror = true;
         VideoRendererGui.update(remoteRender,
@@ -242,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements RTCEventListener 
     }
 
     @Override
-    public void onClientsFetched(Map<String, String> clients) {
+    public void onPeersDownloaded(Map<String, String> clients) {
 
         int foo = 1;
         int bar = foo;

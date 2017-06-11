@@ -48,7 +48,7 @@ public class RTCControllerTest implements LocalMediaStreamAvailableListener {
         displaySize.y = 480;
         //getWindowManager().getDefaultDisplay().getSize(displaySize);
         PeerConnectionParameters params = new PeerConnectionParameters(
-                true, false, displaySize.x, displaySize.y, 30, 1, MainActivity.VIDEO_CODEC_VP9, true, 1, MainActivity.AUDIO_CODEC_OPUS, true);
+                displaySize.x, displaySize.y, 30, 1, MainActivity.VIDEO_CODEC_VP9, true, 1, MainActivity.AUDIO_CODEC_OPUS, true);
 
         rtcConnectionBuilder =
                 new RTCConnectionBuilder(appContext, peerConnectionObserverFactory, sdpObserverFactory, params);
