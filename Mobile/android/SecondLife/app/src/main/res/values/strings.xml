@@ -6,4 +6,20 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_register">RegisterActivity</string>
+
+    <string name="first_name">Imię</string>
+    <string name="last_name">Nazwisko</string>
+    <string name="action_register">Register</string>
+    <string name="email">Email</string>
+    <string name="login">Login</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="error_userFirstName">First name can not be empty</string>
+    <string name="error_userLastName">First name can not be empty</string>
+    <string name="error_userEmail">Invalid email format</string>
+    <string name="error_userPassword">Password must contains at least 8 characters including digits and capitalized letters</string>
+    <string name="error_userPasswordConfirmation">Passwords must be equal</string>
+    <string name="action_login">Loguj</string>
+
 </resources>

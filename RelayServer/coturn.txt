@@ -1,0 +1,32 @@
+https://github.com/coturn/coturn/blob/master/turndb/schema.userdb.redis
+https://github.com/coturn/coturn/wiki/turnserver
+
+-N, --redis-userdb <connection-string>
+User database connection string for Redis.
+The (proprietary) connection string format is like that:
+"ip=<ip-addr> dbname=<number> password=<db-password> connect_timeout=<seconds>".
+
+Generate a key:
+$ turnadmin -k -u <username> -r <realm> -p <password>
+turnadmin -k -u zebul -r rojarand.ddns.net -p szefu1 -->> 3291e1bfec1aa3e6143b5fcc8c379ae2
+turnadmin -k -u foobar -r rojarand.ddns.net -p foobar -->> 51ad14d7838db98cc3c1404d671fb6ef
+
+
+# long term credentials
+set turn/realm/rojarand.ddns.net/user/zebul/key "3291e1bfec1aa3e6143b5fcc8c379ae2"
+set turn/realm/rojarand.ddns.net/user/foobar/key "351ad14d7838db98cc3c1404d671fb6ef"
+List all long-term users in Redis database:
+turnadmin -l --redis-userdb="<db-connection-string>"
+turnadmin -l --redis-userdb="ip=127.0.0.1 dbname=2 password=szefu1 connect_timeout=30"
+
+#admin
+hmset turn/admin_user/zebul realm 'rojarand.ddns.net' password 'szefu1'
+
+
+$ redis-cli <<!
+
+SELECT 2
+AUTH szefu1
+set turn/realm/rojarand.ddns.net/user/zebul/key "3291e1bfec1aa3e6143b5fcc8c379ae2"
+hmset turn/admin_user/zebul realm 'rojarand.ddns.net' password 'szefu1'
+save

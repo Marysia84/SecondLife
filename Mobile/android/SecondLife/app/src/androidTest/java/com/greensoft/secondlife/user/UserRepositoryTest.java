@@ -1,4 +1,5 @@
-package com.greensoft.secondlife;
+package com.greensoft.secondlife.user;
+
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -9,28 +10,30 @@ import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.*;
+import java.io.IOException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
- * Instrumentation test, which will execute on an Android device.
- *
- * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
+ * Created by zebul on 7/10/17.
  */
 @RunWith(AndroidJUnit4.class)
-public class ExampleInstrumentedTest {
-    @Test
-    public void useAppContext() throws Exception {
-        // Context of the app under test.
-        Context appContext = InstrumentationRegistry.getTargetContext();
-
-        assertEquals("com.greensoft.secondlife", appContext.getPackageName());
-    }
-
+public class UserRepositoryTest {
 
     @Test
-    public void test1() {
+    public void test12332() {
 
         try {
+
+            Context appContext = InstrumentationRegistry.getTargetContext();
+            UserRepository userRepository = new UserRepository(appContext);
+
+            User userSaved = new User("foo", "bar", "foo@bar.com", "foofoo");
+            userRepository.save(userSaved);
+            User userLoaded = userRepository.load();
+            assertEquals(userSaved, userLoaded);
+            /*
             JSONObject jsonObject2 = new JSONObject("{\"name\":\"mkyong.com\",\"messages\":[\"msg 1\",\"msg 2\",\"msg 3\"],\"age\":100}");
             final Object name = jsonObject2.get("name");
 
@@ -44,9 +47,11 @@ public class ExampleInstrumentedTest {
             JSONObject jsonObject1 = new JSONObject(stringifiedJSONObject);
             final Object firstName = jsonObject1.get("firstName");
             assertEquals("john", firstName);
-
-        } catch (JSONException e) {
-            e.printStackTrace();
+            */
+        } catch (IOException e) {
+            fail(e.getMessage());
         }
     }
+
+
 }
