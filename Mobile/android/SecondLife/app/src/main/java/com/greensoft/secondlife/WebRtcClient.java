@@ -61,7 +61,7 @@ public class WebRtcClient {
           // draft-nandakumar-rtcweb-stun-uri-01
           // stunURI       = scheme ":" stun-host [ ":" stun-port ]
           // scheme        = "stun" / "stuns"
-          // stun-host     = IP-literal / IPv4address / reg-name
+          // stun-host     = IP-literal / IPv4address / reg-Name
           // stun-port     = *DIGIT
           // draft-petithuguenin-behave-turn-uris-01
           // turnURI       = scheme ":" turn-host [ ":" turn-port ]
@@ -69,7 +69,7 @@ public class WebRtcClient {
           // scheme        = "turn" / "turns"
           // transport     = "udp" / "tcp" / transport-ext
           // transport-ext = 1*unreserved
-          // turn-host     = IP-literal / IPv4address / reg-name
+          // turn-host     = IP-literal / IPv4address / reg-Name
           // turn-port     = *DIGIT
         */
         iceServers.add(new PeerConnection.IceServer("stun:23.21.150.121"));
@@ -232,7 +232,7 @@ public class WebRtcClient {
                     try {
                         JSONObject jsonObject = (JSONObject)clientsArray.get(i);
                         String id = jsonObject.getString("id");
-                        String name = jsonObject.getString("name");
+                        String name = jsonObject.getString("Name");
                         clients.put(id, name);
                     } catch (JSONException e) {
 
@@ -411,13 +411,13 @@ public class WebRtcClient {
      * Set up the local stream and notify the signaling server.
      * Call this method after onCallReady.
      *
-     * @param name client name
+     * @param name client Name
      */
     public void start(String name){
         setCamera();
         try {
             JSONObject message = new JSONObject();
-            message.put("name", name);
+            message.put("Name", name);
             client.emit("readyToStream", message);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -445,7 +445,7 @@ public class WebRtcClient {
         return VideoCapturerAndroid.create(frontCameraDeviceName);
     }
 
-    // Returns the name of the camera with camera index. Returns null if the
+    // Returns the Name of the camera with camera index. Returns null if the
     // camera can not be used.
     public static String getDeviceName(int index) {
         Camera.CameraInfo info = new Camera.CameraInfo();
@@ -462,7 +462,7 @@ public class WebRtcClient {
                 + ", Orientation " + info.orientation;
     }
 
-    // Returns the name of the front facing camera. Returns null if the
+    // Returns the Name of the front facing camera. Returns null if the
     // camera can not be used or does not exist.
     public static String getNameOfFrontFacingDevice() {
         for (int i = 0; i < Camera.getNumberOfCameras(); ++i) {
@@ -478,7 +478,7 @@ public class WebRtcClient {
         return null;
     }
 
-    // Returns the name of the back facing camera. Returns null if the
+    // Returns the Name of the back facing camera. Returns null if the
     // camera can not be used or does not exist.
     public static String getNameOfBackFacingDevice() {
         for (int i = 0; i < Camera.getNumberOfCameras(); ++i) {

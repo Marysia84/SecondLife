@@ -26,7 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static com.greensoft.secondlife.SecondLifeService.getDeviceName;
+import static com.greensoft.secondlife.utils.Utils.getDeviceName;
 
 /**
  * Created by zebul on 5/22/17.
@@ -97,7 +97,7 @@ public class RTCOrchestrator implements Restartable, LocalMediaStreamAvailableLi
 
         try {
             JSONObject message = new JSONObject();
-            message.put("name", getDeviceName());
+            message.put("Name", getDeviceName());
             client.emit("readyToStream", message);
         } catch (JSONException e) {
             Logger.e(TAG, e.getMessage());
@@ -113,7 +113,7 @@ public class RTCOrchestrator implements Restartable, LocalMediaStreamAvailableLi
             try {
                 JSONObject jsonObject = (JSONObject)clientsArray.get(i);
                 String id = jsonObject.getString("id");
-                String name = jsonObject.getString("name");
+                String name = jsonObject.getString("Name");
                 clients.put(id, name);
             } catch (JSONException e) {
                 Logger.e(TAG, e.getMessage());

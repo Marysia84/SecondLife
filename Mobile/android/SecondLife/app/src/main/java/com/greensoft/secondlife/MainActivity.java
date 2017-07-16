@@ -260,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements RTCEventListener 
         int bar = foo;
     }
 
-    /** Returns the consumer friendly device name */
+    /** Returns the consumer friendly device Name */
     public static String getDeviceName() {
         String manufacturer = Build.MANUFACTURER;
         String model = Build.MODEL;

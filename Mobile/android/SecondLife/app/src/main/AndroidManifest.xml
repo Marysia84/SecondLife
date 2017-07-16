@@ -4,6 +4,7 @@
 
     <uses-feature android:name="android.hardware.camera" />
 
+    <uses-permission android:name="android.permission.SET_DEBUG_APP" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.hardware.camera.autofocus" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -12,7 +13,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <application>
+    <application android:name=".SecondLifeApplication">
         <activity
             android:name=".ConfigurationActivity"
             android:label="@string/title_activity_configuration"
@@ -20,7 +21,15 @@
         <activity
             android:name=".CameraViewActivity"
             android:label="@string/title_activity_demo"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".user.registration.UserRegisterActivity"
+            android:label="@string/title_activity_register"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".user.login.UserLoginActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".mobile_device.registration.MobileDeviceRegisterActivity"></activity>
     </application>
 
 </manifest>
