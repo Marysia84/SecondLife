@@ -22,7 +22,7 @@ import static junit.framework.Assert.fail;
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest
-public class UserRegistarTest {
+public class UserRegistrarTest {
 
     @Test
     public void test1() {
@@ -46,9 +46,9 @@ public class UserRegistarTest {
             }
         };
 
-        UserRegistar userRegistar = new UserRegistar(targetContext);
+        UserRegistrar userRegistrar = new UserRegistrar(targetContext);
         User user = new User("foo", "bar", "foo@bar12.com", "foofoo");
-        userRegistar.register(user, userRegistrationResultListener);
+        userRegistrar.register(user, userRegistrationResultListener);
 
         synchronized (userRegistrationResultListener){
 

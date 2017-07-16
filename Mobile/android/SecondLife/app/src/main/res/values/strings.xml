@@ -21,5 +21,8 @@
     <string name="error_userPassword">Password must contains at least 8 characters including digits and capitalized letters</string>
     <string name="error_userPasswordConfirmation">Passwords must be equal</string>
     <string name="action_login">Loguj</string>
+    <string name="model_name">Nazwa modelu</string>
+    <string name="name">Nazwa</string>
+    <string name="error_mobileDeviceName">Name can not be empty</string>
 
 </resources>

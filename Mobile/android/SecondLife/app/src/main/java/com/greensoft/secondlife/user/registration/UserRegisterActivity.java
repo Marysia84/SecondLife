@@ -21,7 +21,7 @@ public class UserRegisterActivity extends AppCompatActivity implements UserRegis
     private EditText passwordEditText;
     private EditText confirmPasswordEditText;
     private Button registerButton;
-    private UserRegistar userRegistar;
+    private UserRegistrar userRegistrar;
 
     class UserCreationException extends Exception{
 
@@ -44,19 +44,17 @@ public class UserRegisterActivity extends AppCompatActivity implements UserRegis
 
         setUpControls();
 
-        userRegistar = buildRegistar();
+        userRegistrar = buildRegistrar();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        userRegistar.start();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        userRegistar.stop();
     }
 
     private void setUpControls() {
@@ -107,7 +105,7 @@ public class UserRegisterActivity extends AppCompatActivity implements UserRegis
 
         try {
             final User user = createUser();
-            userRegistar.register(user, this);
+            userRegistrar.register(user, this);
         } catch (UserCreationException exc) {
             exc.showError();
         }
@@ -143,7 +141,7 @@ public class UserRegisterActivity extends AppCompatActivity implements UserRegis
         });
     }
 
-    private UserRegistar buildRegistar() {
+    private UserRegistrar buildRegistrar() {
 
         final Intent intent = getIntent();
         if(intent == null){
@@ -153,16 +151,16 @@ public class UserRegisterActivity extends AppCompatActivity implements UserRegis
         if(extras == null){
             return createDefaultRegistar();
         }
-        final UserRegistar.RegistarBuilder registarBuilder =
-                (UserRegistar.RegistarBuilder)extras.getSerializable(AppConst.KEY_USER_REGISTRAR_BUILDER);
+        final UserRegistrar.RegistarBuilder registarBuilder =
+                (UserRegistrar.RegistarBuilder)extras.getSerializable(AppConst.KEY_USER_REGISTRAR_BUILDER);
         if(registarBuilder == null){
             return createDefaultRegistar();
         }
         return registarBuilder.build();
     }
 
-    private UserRegistar createDefaultRegistar(){
+    private UserRegistrar createDefaultRegistar(){
 
-        return new UserRegistar(this);
+        return new UserRegistrar(this);
     }
 }

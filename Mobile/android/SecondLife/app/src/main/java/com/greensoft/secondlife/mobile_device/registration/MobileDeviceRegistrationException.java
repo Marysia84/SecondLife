@@ -1,4 +1,4 @@
-package com.greensoft.secondlife.user.registration;
+package com.greensoft.secondlife.mobile_device.registration;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.VolleyError;
@@ -12,19 +12,20 @@ import javax.net.ssl.HttpsURLConnection;
  * Created by zebul on 6/24/17.
  */
 
-public class UserRegistrationException extends VolleyException {
+public class MobileDeviceRegistrationException extends VolleyException {
 
-    public UserRegistrationException(JSONException cause_){
-
-        super(cause_);
-    }
-
-    public UserRegistrationException(VolleyError cause_){
+    public MobileDeviceRegistrationException(JSONException cause_){
 
         super(cause_);
     }
 
-    public boolean userAlreadyExists(){
+    public MobileDeviceRegistrationException(VolleyError cause_){
+
+        super(cause_);
+    }
+
+
+    public boolean mobileDeviceAlreadyExists(){
 
         return resourceConflict();
     }

@@ -1,4 +1,4 @@
-package com.greensoft.secondlife.voley;
+package com.greensoft.secondlife.volley;
 
 import android.content.Context;
 

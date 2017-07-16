@@ -1,4 +1,4 @@
-package com.greensoft.secondlife.user.registration;
+package com.greensoft.secondlife.user.login;
 
 import android.content.Context;
 
@@ -7,81 +7,72 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.greensoft.secondlife.user.Credentials;
 import com.greensoft.secondlife.user.User;
 import com.greensoft.secondlife.utils.Utils;
-import com.greensoft.secondlife.voley.RequestQueueSingleton;
+import com.greensoft.secondlife.volley.RequestQueueSingleton;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
 
+import static com.greensoft.secondlife.AppConst.VOLEY_SOCKET_TIMEOUT_MS;
+
 /**
- * Created by zebul on 6/24/17.
+ * Created by zebul on 7/16/17.
  */
 
-public class UserRegistar {
+public class UserLogin {
 
     private Context context;
-    public UserRegistar(Context context_){
+    public UserLogin(Context context_){
         context = context_;
     }
 
-    public interface RegistarBuilder extends Serializable{
+    public interface UserLoginBuilder extends Serializable {
 
-        UserRegistar build();
+        UserLogin build();
     }
 
-    public void start(){
-
-    }
-
-    public void stop(){
-
-    }
-
-    public void register(User user, UserRegistrationResultListener userRegistrationResultListener){
+    public void login(Credentials credentials, UserLoginResultListener userLoginResultListener) {
 
         try {
-            doRegister(user, userRegistrationResultListener);
+            doLogin(credentials, userLoginResultListener);
         } catch (JSONException e) {
-            userRegistrationResultListener.onUserRegistrationFailure(new UserRegistrationException(e));
+            userLoginResultListener.onUserLoginFailure(new UserLoginException(e));
         }
     }
 
-    private void doRegister(final User user, final UserRegistrationResultListener userRegistrationResultListener)
+    private void doLogin(final Credentials credentials, final UserLoginResultListener userLoginResultListener)
             throws JSONException {
 
         JSONObject userJSON = new JSONObject();
-        userJSON.put("firstName", user.FirstName);
-        userJSON.put("lastName", user.LastName);
-        userJSON.put("email", user.Email);
-        userJSON.put("password", user.Password);
+        userJSON.put("email", credentials.Email);
+        userJSON.put("password", credentials.Password);
 
-        final String url = Utils.formatAPIUrl("register");
+        final String url = Utils.formatAPIUrl("login");
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
                 (Request.Method.PUT, url, userJSON, new Response.Listener<JSONObject>() {
 
                     @Override
                     public void onResponse(JSONObject response) {
-                        userRegistrationResultListener.onUserRegistrationSuccess(user);
+                        userLoginResultListener.onUserLoginSuccess(credentials);
                     }
                 }, new Response.ErrorListener() {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        userRegistrationResultListener.onUserRegistrationFailure(new UserRegistrationException(error));
+                        userLoginResultListener.onUserLoginFailure(new UserLoginException(error));
                     }
                 });
 
-        final int SOCKET_TIMEOUT_MS = 10000;
         jsObjRequest.setRetryPolicy(new DefaultRetryPolicy(
-                SOCKET_TIMEOUT_MS,
+                VOLEY_SOCKET_TIMEOUT_MS,
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         // Access the RequestQueue through your singleton class.
         RequestQueueSingleton.getInstance(context).addToRequestQueue(jsObjRequest);
     }
-
 
 }

@@ -14,6 +14,16 @@ tools:context="com.greensoft.secondlife.user.registration.UserRegisterActivity" 
 
     <LinearLayout
         style="@style/edit_text_entry">
+        <Button
+            android:id="@+id/gotoLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:text="@string/action_login" />
+    </LinearLayout>
+
+    <LinearLayout
+        style="@style/edit_text_entry">
         <TextView
             style="@style/text_view_title"
             android:text="@string/first_name"/>

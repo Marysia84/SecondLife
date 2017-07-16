@@ -43,21 +43,11 @@ public class UserRegisterActivityTest {
             UserRegisterActivity.class, true, false);
 
 
-    public static class UserRegistarFake extends UserRegistar {
+    public static class UserRegistrarFake extends UserRegistrar {
 
-        public UserRegistarFake(){
+        public UserRegistrarFake(){
 
             super(null);
-        }
-
-        @Override
-        public void start(){
-
-        }
-
-        @Override
-        public void stop(){
-
         }
 
         @Override
@@ -77,11 +67,11 @@ public class UserRegisterActivityTest {
         activityRule.launchActivity(intent);
     }
 
-    public static class RegistarBuilderFake implements UserRegistar.RegistarBuilder{
+    public static class RegistarBuilderFake implements UserRegistrar.RegistarBuilder{
 
         @Override
-        public UserRegistar build() {
-            return new UserRegistarFake();
+        public UserRegistrar build() {
+            return new UserRegistrarFake();
         }
     }
 

@@ -31,14 +31,14 @@ public class ExampleInstrumentedTest {
     public void test1() {
 
         try {
-            JSONObject jsonObject2 = new JSONObject("{\"name\":\"mkyong.com\",\"messages\":[\"msg 1\",\"msg 2\",\"msg 3\"],\"age\":100}");
-            final Object name = jsonObject2.get("name");
+            JSONObject jsonObject2 = new JSONObject("{\"Name\":\"mkyong.com\",\"messages\":[\"msg 1\",\"msg 2\",\"msg 3\"],\"age\":100}");
+            final Object name = jsonObject2.get("Name");
 
             JSONObject jsonObject0 = new JSONObject();
             jsonObject0.put("version", "1");
             jsonObject0.put("firstName", "john");
             jsonObject0.put("lastName", "smith");
-            jsonObject0.put("email", "john.smith@gmail.com");
+            jsonObject0.put("Email", "john.smith@gmail.com");
             final String stringifiedJSONObject = jsonObject0.toString();
 
             JSONObject jsonObject1 = new JSONObject(stringifiedJSONObject);

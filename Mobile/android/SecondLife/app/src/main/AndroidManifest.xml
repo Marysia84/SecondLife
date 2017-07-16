@@ -28,7 +28,8 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".user.login.UserLoginActivity"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".mobile_device.registration.MobileDeviceRegisterActivity"></activity>
     </application>
 
 </manifest>

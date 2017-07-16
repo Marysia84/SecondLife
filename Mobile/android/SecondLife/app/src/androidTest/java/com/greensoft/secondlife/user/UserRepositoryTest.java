@@ -22,32 +22,18 @@ import static org.junit.Assert.fail;
 public class UserRepositoryTest {
 
     @Test
-    public void test12332() {
+    public void test_when_user_is_saved_then_load_returns_equal_user() {
 
         try {
 
             Context appContext = InstrumentationRegistry.getTargetContext();
-            UserRepository userRepository = new UserRepository(appContext);
+            UserRepository userRepository = new UserRepository(appContext, "user_test.bin");
 
             User userSaved = new User("foo", "bar", "foo@bar.com", "foofoo");
             userRepository.save(userSaved);
             User userLoaded = userRepository.load();
             assertEquals(userSaved, userLoaded);
-            /*
-            JSONObject jsonObject2 = new JSONObject("{\"name\":\"mkyong.com\",\"messages\":[\"msg 1\",\"msg 2\",\"msg 3\"],\"age\":100}");
-            final Object name = jsonObject2.get("name");
 
-            JSONObject jsonObject0 = new JSONObject();
-            jsonObject0.put("version", "1");
-            jsonObject0.put("firstName", "john");
-            jsonObject0.put("lastName", "smith");
-            jsonObject0.put("email", "john.smith@gmail.com");
-            final String stringifiedJSONObject = jsonObject0.toString();
-
-            JSONObject jsonObject1 = new JSONObject(stringifiedJSONObject);
-            final Object firstName = jsonObject1.get("firstName");
-            assertEquals("john", firstName);
-            */
         } catch (IOException e) {
             fail(e.getMessage());
         }
