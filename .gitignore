@@ -1,3 +1,5 @@
 *.iml
 *.jar
-SignalingServer/
+SignalingServer/node
+SignalingServer/node_redis
+

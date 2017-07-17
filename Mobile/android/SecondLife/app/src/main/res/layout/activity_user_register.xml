@@ -29,6 +29,7 @@ tools:context="com.greensoft.secondlife.user.registration.UserRegisterActivity" 
             android:text="@string/first_name"/>
         <EditText
             android:id="@+id/firstNameEditText"
+            android:text="foo"
             style="@style/edit_text_value" />
     </LinearLayout>
 
@@ -39,8 +40,8 @@ tools:context="com.greensoft.secondlife.user.registration.UserRegisterActivity" 
             android:text="@string/last_name"/>
         <EditText
             android:id="@+id/lastNameEditText"
-            style="@style/edit_text_value"
-            android:text=""/>
+            android:text="bar"
+            style="@style/edit_text_value" />
     </LinearLayout>
 
     <LinearLayout
@@ -51,7 +52,7 @@ tools:context="com.greensoft.secondlife.user.registration.UserRegisterActivity" 
         <EditText
             android:id="@+id/emailEditText"
             style="@style/edit_text_value"
-            android:text=""/>
+            android:text="foo@bar.com"/>
     </LinearLayout>
 
     <LinearLayout
@@ -62,7 +63,7 @@ tools:context="com.greensoft.secondlife.user.registration.UserRegisterActivity" 
         <EditText
             android:id="@+id/passwordEditText"
             style="@style/edit_text_value"
-            android:text=""/>
+            android:text="foofoo"/>
     </LinearLayout>
 
     <LinearLayout
@@ -73,7 +74,7 @@ tools:context="com.greensoft.secondlife.user.registration.UserRegisterActivity" 
         <EditText
             android:id="@+id/confirmPasswordEditText"
             style="@style/edit_text_value"
-            android:text=""/>
+            android:text="foofoo"/>
     </LinearLayout>
 
     <Button

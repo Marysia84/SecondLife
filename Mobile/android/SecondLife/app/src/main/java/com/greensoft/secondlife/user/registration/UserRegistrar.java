@@ -52,13 +52,19 @@ public class UserRegistrar {
         userJSON.put("email", user.Email);
         userJSON.put("password", user.Password);
 
-        final String url = Utils.formatAPIUrl("register");
+        final String url = Utils.formatAPIUrl("registeruser");
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
                 (Request.Method.PUT, url, userJSON, new Response.Listener<JSONObject>() {
 
                     @Override
                     public void onResponse(JSONObject response) {
-                        userRegistrationResultListener.onUserRegistrationSuccess(user);
+
+                        try {
+                            user.Id = response.getString("id");
+                            userRegistrationResultListener.onUserRegistrationSuccess(user);
+                        } catch (JSONException e) {
+                            userRegistrationResultListener.onUserRegistrationFailure(new UserRegistrationException(e));
+                        }
                     }
                 }, new Response.ErrorListener() {
 

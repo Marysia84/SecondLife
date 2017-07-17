@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.greensoft.secondlife.AppConst;
 import com.greensoft.secondlife.R;
 import com.greensoft.secondlife.mobile_device.MobileDevice;
+import com.greensoft.secondlife.user.User;
 import com.greensoft.secondlife.utils.Utils;
 
 public class MobileDeviceRegisterActivity extends AppCompatActivity
@@ -20,6 +21,7 @@ implements MobileDeviceRegistrationResultListener{
     private EditText nameEditText;
     private EditText modelNameEditText;
     private MobileDeviceRegistrar mobileDeviceRegistrar;
+    private User user;
 
     class MobileDeviceCreationException extends Exception{
 
@@ -41,6 +43,9 @@ implements MobileDeviceRegistrationResultListener{
         setContentView(R.layout.activity_mobile_device_register);
 
         setUpControls();
+        final Intent intent = getIntent();
+        final Bundle bundle = intent.getExtras();
+        user = (User)bundle.getSerializable(AppConst.KEY_USER);
         mobileDeviceRegistrar = buildRegistar();
     }
 
@@ -48,6 +53,7 @@ implements MobileDeviceRegistrationResultListener{
 
         nameEditText = (EditText)findViewById(R.id.nameEditText);
         modelNameEditText = (EditText)findViewById(R.id.modelNameEditText);
+        modelNameEditText.setText(Utils.getDeviceModelName());
 
         Button registerButton = (Button)findViewById(R.id.registerButton);
         registerButton.setOnClickListener(new View.OnClickListener() {
@@ -62,7 +68,7 @@ implements MobileDeviceRegistrationResultListener{
 
         try {
             final MobileDevice mobileDevice = createMobileDevice();
-            mobileDeviceRegistrar.register(mobileDevice, this);
+            mobileDeviceRegistrar.register(user, mobileDevice, this);
         } catch (MobileDeviceRegisterActivity.MobileDeviceCreationException exc) {
             exc.showError();
         }
@@ -76,7 +82,7 @@ implements MobileDeviceRegistrationResultListener{
         }
 
         final String id = "foo";
-        final String deviceName = Utils.getDeviceName();
+        final String deviceName = Utils.getDeviceModelName();
 
         return new MobileDevice(id, name, deviceName);
     }

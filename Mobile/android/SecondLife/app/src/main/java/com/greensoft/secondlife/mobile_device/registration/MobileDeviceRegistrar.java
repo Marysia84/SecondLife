@@ -8,6 +8,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.greensoft.secondlife.mobile_device.MobileDevice;
+import com.greensoft.secondlife.user.User;
 import com.greensoft.secondlife.utils.Utils;
 import com.greensoft.secondlife.volley.RequestQueueSingleton;
 
@@ -36,17 +37,19 @@ public class MobileDeviceRegistrar{
     }
 
     public void register(
+            User user,
             MobileDevice mobileDevice,
             MobileDeviceRegistrationResultListener mobileDeviceRegistrationResultListener) {
 
         try {
-            doRegister(mobileDevice, mobileDeviceRegistrationResultListener);
+            doRegister(user, mobileDevice, mobileDeviceRegistrationResultListener);
         } catch (JSONException e) {
             mobileDeviceRegistrationResultListener.onMobileDeviceRegistrationFailure(new MobileDeviceRegistrationException(e));
         }
     }
 
     private void doRegister(
+            final User user,
             final MobileDevice mobileDevice,
             final MobileDeviceRegistrationResultListener mobileDeviceRegistrationResultListener)
             throws JSONException {
@@ -56,7 +59,7 @@ public class MobileDeviceRegistrar{
         userJSON.put("name", mobileDevice.Name);
         userJSON.put("modelName", mobileDevice.ModelName);
 
-        final String url = Utils.formatAPIUrl("register");
+        final String url = Utils.formatAPIUrl("registerdevice", user.Id);
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
                 (Request.Method.PUT, url, userJSON, new Response.Listener<JSONObject>() {
 

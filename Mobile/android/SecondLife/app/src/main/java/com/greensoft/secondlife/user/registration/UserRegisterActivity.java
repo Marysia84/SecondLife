@@ -10,8 +10,12 @@ import android.widget.Toast;
 
 import com.greensoft.secondlife.AppConst;
 import com.greensoft.secondlife.R;
+import com.greensoft.secondlife.mobile_device.registration.MobileDeviceRegisterActivity;
 import com.greensoft.secondlife.user.User;
+import com.greensoft.secondlife.user.UserRepository;
 import com.greensoft.secondlife.user.UserValidator;
+
+import java.io.IOException;
 
 public class UserRegisterActivity extends AppCompatActivity implements UserRegistrationResultListener {
 
@@ -98,7 +102,8 @@ public class UserRegisterActivity extends AppCompatActivity implements UserRegis
             throw new UserCreationException(confirmPasswordEditText, UserValidator.formatPasswordsEqualErrorText(this));
         }
 
-        return new User(firstName, lastName, email, password);
+        String id = ""; //id is created by server side
+        return new User(id, firstName, lastName, email, password);
     }
 
     private void register() {
@@ -114,13 +119,32 @@ public class UserRegisterActivity extends AppCompatActivity implements UserRegis
     @Override
     public void onUserRegistrationSuccess(User user) {
 
+        /*
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
 
                 Toast.makeText(UserRegisterActivity.this, "Success", Toast.LENGTH_SHORT).show();
             }
-        });
+        });*/
+        try {
+            UserRepository userRepository = new UserRepository(this);
+            userRepository.save(user);
+            Intent intent = new Intent(this, MobileDeviceRegisterActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putSerializable(AppConst.KEY_USER, user);
+            intent.putExtras(bundle);
+            startActivity(intent);
+            finish();
+        } catch (final IOException exc) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    Toast.makeText(UserRegisterActivity.this, exc.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
 

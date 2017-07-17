@@ -28,6 +28,7 @@ public class UserRepository {
         this.fileName = fileName;
     }
 
+    private static final String ID = "id";
     private static final String VERSION = "version";
     private static final String FIRST_NAME = "firstName";
     private static final String LAST_NAME = "lastName";
@@ -39,6 +40,7 @@ public class UserRepository {
         try {
             JSONObject json = new JSONObject();
             json.put(VERSION, 1);
+            json.put(ID, user.Id);
             json.put(FIRST_NAME, user.FirstName);
             json.put(LAST_NAME, user.LastName);
             json.put(EMAIL, user.Email);
@@ -59,11 +61,12 @@ public class UserRepository {
             String jsonText = new String(bytes);
             JSONObject json = new JSONObject(jsonText);
             int version = json.getInt(VERSION);
+            String id = json.getString(ID);
             String firstName = json.getString(FIRST_NAME);
             String lastName = json.getString(LAST_NAME);
             String email = json.getString(EMAIL);
             String password = json.getString(PASSWORD);
-            return new User(firstName, lastName, email, password);
+            return new User(id, firstName, lastName, email, password);
         }
         catch(FileNotFoundException e){
             return null;

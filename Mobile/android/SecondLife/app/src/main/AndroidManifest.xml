@@ -29,7 +29,14 @@
         <activity
             android:name=".user.login.UserLoginActivity"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".mobile_device.registration.MobileDeviceRegisterActivity"></activity>
+        <activity android:name=".mobile_device.registration.MobileDeviceRegisterActivity" />
+        <!--
+        <activity
+            android:name=".splash.SplashActivity"
+            android:label="@string/title_activity_splash"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+        </activity>
+        -->
     </application>
 
 </manifest>

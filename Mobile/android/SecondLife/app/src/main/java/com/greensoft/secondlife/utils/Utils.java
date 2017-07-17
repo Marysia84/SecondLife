@@ -10,12 +10,21 @@ import static com.greensoft.secondlife.AppConst.SECOND_LIFE_URL;
 
 public class Utils {
 
-    public static String formatAPIUrl(String route){
+    public static String formatAPIUrl(String route, String ... args){
 
-        return SECOND_LIFE_URL+"/api/"+route;
+        String apiUrl = SECOND_LIFE_URL+"/api/"+route;
+        if(args.length > 0){
+
+            for(int i = 0; i<args.length; i++){
+
+                apiUrl += "/"+args[i];
+            }
+        }
+
+        return apiUrl;
     }
 
-    public static String getDeviceName() {
+    public static String getDeviceModelName() {
         String manufacturer = Build.MANUFACTURER;
         String model = Build.MODEL;
         if (model.startsWith(manufacturer)) {

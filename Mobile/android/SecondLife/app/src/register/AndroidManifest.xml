@@ -11,7 +11,8 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name=".user.registration.UserRegisterActivity">
+            android:name=".splash.SplashActivity"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

@@ -24,5 +24,6 @@
     <string name="model_name">Nazwa modelu</string>
     <string name="name">Nazwa</string>
     <string name="error_mobileDeviceName">Name can not be empty</string>
+    <string name="title_activity_splash">SplashActivity</string>
 
 </resources>

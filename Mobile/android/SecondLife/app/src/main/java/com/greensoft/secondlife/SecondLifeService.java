@@ -234,7 +234,7 @@ public class SecondLifeService extends Service
 
     public void startCam() {
         // Camera settings
-        //client.start(getDeviceName());
+        //client.start(getDeviceModelName());
     }
 
     @Override
