@@ -1,6 +1,8 @@
 Second Life
 ============
 
+**This is a demo project. Does not copy or fork it.**
+
 Second Life gives your mobile devices next chance to be useful for you.
 
 Paragraphs are separated by a blank line.
